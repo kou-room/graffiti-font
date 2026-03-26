@@ -6,145 +6,153 @@
   <title>気分シェア</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: #0f0f0f; min-height: 100vh;
-      font-family: -apple-system, sans-serif; color: #fff;
-    }
+    body { background: #0f0f0f; min-height: 100vh; font-family: -apple-system, sans-serif; color: #fff; }
 
-    .header {
-      text-align: center; padding: 32px 20px 16px;
-      border-bottom: 1px solid #1e1e1e;
-    }
+    .header { text-align: center; padding: 28px 20px 16px; border-bottom: 1px solid #1e1e1e; position: relative; }
     .header h1 { font-size: 20px; font-weight: 700; letter-spacing: 2px; }
     .header p { font-size: 11px; color: #555; letter-spacing: 3px; text-transform: uppercase; margin-top: 4px; }
+    .logout-btn { position: absolute; right: 16px; top: 28px; background: #1a1a1a; border: 1px solid #2a2a2a; color: #666; padding: 6px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; }
 
-    /* 自分の設定 */
-    .my-section {
-      padding: 20px;
-      border-bottom: 1px solid #1e1e1e;
-    }
+    /* ログイン画面 */
+    .auth-screen { padding: 40px 20px; max-width: 480px; margin: 0 auto; }
+    .auth-title { font-size: 18px; font-weight: 700; margin-bottom: 24px; text-align: center; }
+    .auth-input { width: 100%; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; color: #fff; font-size: 15px; padding: 14px 16px; outline: none; margin-bottom: 12px; }
+    .auth-input:focus { border-color: #555; }
+    .auth-btn { width: 100%; padding: 14px; background: #fff; color: #000; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; letter-spacing: 2px; cursor: pointer; margin-bottom: 10px; }
+    .auth-btn:active { background: #ccc; }
+    .auth-switch { text-align: center; color: #555; font-size: 12px; cursor: pointer; text-decoration: underline; }
+
+    /* メイン画面 */
+    .main-screen { display: none; }
+
+    /* プロフィール設定 */
+    .profile-section { padding: 16px 20px; border-bottom: 1px solid #1e1e1e; display: flex; align-items: center; gap: 14px; }
+    .avatar-wrapper { position: relative; cursor: pointer; }
+    .avatar { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid #2a2a2a; background: #1a1a1a; display: flex; align-items: center; justify-content: center; font-size: 22px; overflow: hidden; }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-edit { position: absolute; bottom: -2px; right: -2px; background: #fff; color: #000; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; display: flex; align-items: center; justify-content: center; }
+    .profile-name { font-size: 16px; font-weight: 600; }
+    .profile-sub { font-size: 11px; color: #555; margin-top: 2px; }
+
+    .my-section { padding: 16px 20px; border-bottom: 1px solid #1e1e1e; }
     .my-label { font-size: 10px; color: #555; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
 
-    .name-input {
-      width: 100%; background: #1a1a1a; border: 1px solid #2a2a2a;
-      border-radius: 8px; color: #fff; font-size: 15px;
-      padding: 12px 14px; outline: none; margin-bottom: 14px;
-    }
-    .name-input::placeholder { color: #333; }
-    .name-input:focus { border-color: #444; }
-
-    /* 気分選択 */
-    .mood-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
-      margin-bottom: 14px;
-    }
-    .mood-btn {
-      background: #1a1a1a; border: 2px solid #2a2a2a; border-radius: 12px;
-      padding: 14px 8px; text-align: center; cursor: pointer; transition: all 0.2s;
-    }
+    .mood-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+    .mood-btn { background: #1a1a1a; border: 2px solid #2a2a2a; border-radius: 12px; padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.2s; }
     .mood-btn:active { transform: scale(0.95); }
     .mood-btn.selected { border-color: #fff; background: #2a2a2a; }
-    .mood-emoji { font-size: 28px; display: block; margin-bottom: 4px; }
-    .mood-label { font-size: 11px; color: #888; }
+    .mood-emoji { font-size: 26px; display: block; margin-bottom: 4px; }
+    .mood-label { font-size: 10px; color: #888; }
     .mood-btn.selected .mood-label { color: #fff; }
 
-    .share-btn {
-      width: 100%; padding: 14px; background: #fff; color: #000;
-      border: none; border-radius: 10px; font-size: 13px; font-weight: 700;
-      letter-spacing: 2px; cursor: pointer; text-transform: uppercase;
-    }
+    .tweet-input { width: 100%; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; color: #ddd; font-size: 14px; padding: 12px 14px; outline: none; resize: none; height: 70px; margin-bottom: 12px; font-family: inherit; }
+    .tweet-input:focus { border-color: #444; }
+    .tweet-input::placeholder { color: #333; }
+
+    .share-btn { width: 100%; padding: 14px; background: #fff; color: #000; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; }
     .share-btn:active { background: #ccc; }
     .share-btn:disabled { background: #2a2a2a; color: #555; cursor: not-allowed; }
 
     /* みんなの気分 */
-    .friends-section { padding: 20px; }
-    .friends-label { font-size: 10px; color: #555; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 16px; }
+    .friends-section { padding: 16px 20px; }
+    .friends-label { font-size: 10px; color: #555; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 14px; }
 
-    .friend-card {
-      background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px;
-      padding: 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 14px;
-    }
-    .friend-emoji { font-size: 36px; }
+    .friend-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+    .friend-top { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .friend-avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; background: #2a2a2a; display: flex; align-items: center; justify-content: center; font-size: 20px; overflow: hidden; flex-shrink: 0; }
+    .friend-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
     .friend-info { flex: 1; }
-    .friend-name { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
-    .friend-mood { font-size: 12px; color: #888; }
+    .friend-name { font-size: 14px; font-weight: 600; }
+    .friend-mood { font-size: 12px; color: #888; margin-top: 1px; }
     .friend-time { font-size: 10px; color: #444; margin-top: 2px; }
+    .friend-emoji-big { font-size: 32px; }
+
+    .tweet-text { font-size: 13px; color: #ccc; padding: 8px 0; border-top: 1px solid #2a2a2a; margin-top: 4px; }
+
+    /* コメント */
+    .comments-section { border-top: 1px solid #2a2a2a; margin-top: 8px; padding-top: 8px; }
+    .comment-item { display: flex; gap: 8px; margin-bottom: 6px; }
+    .comment-avatar { width: 28px; height: 28px; border-radius: 50%; background: #2a2a2a; display: flex; align-items: center; justify-content: center; font-size: 12px; overflow: hidden; flex-shrink: 0; }
+    .comment-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .comment-body { background: #222; border-radius: 8px; padding: 6px 10px; flex: 1; }
+    .comment-name { font-size: 10px; color: #888; margin-bottom: 2px; }
+    .comment-text { font-size: 12px; color: #ddd; }
+
+    .comment-input-row { display: flex; gap: 8px; margin-top: 8px; }
+    .comment-input { flex: 1; background: #222; border: 1px solid #2a2a2a; border-radius: 20px; color: #ddd; font-size: 12px; padding: 8px 12px; outline: none; font-family: inherit; }
+    .comment-input::placeholder { color: #333; }
+    .comment-send { background: #fff; color: #000; border: none; border-radius: 20px; padding: 8px 14px; font-size: 11px; font-weight: 700; cursor: pointer; }
 
     .empty-msg { text-align: center; color: #333; font-size: 13px; padding: 32px 0; }
 
-    .toast {
-      position: fixed; bottom: 30px; left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: #1a1a1a; color: #fff; padding: 10px 20px;
-      border-radius: 8px; font-size: 12px; border: 1px solid #333;
-      opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap;
-    }
+    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1a1a1a; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 12px; border: 1px solid #333; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; z-index: 999; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    input[type="file"] { display: none; }
   </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>気分シェア 🌀</h1>
-  <p>Kimochi Share</p>
+<!-- ログイン画面 -->
+<div id="authScreen">
+  <div class="header"><h1>気分シェア 🌀</h1><p>Kimochi Share</p></div>
+  <div class="auth-screen">
+    <div class="auth-title" id="authTitle">ログイン</div>
+    <input class="auth-input" id="authName" placeholder="名前" maxlength="15">
+    <input class="auth-input" id="authPass" type="password" placeholder="パスワード" maxlength="20">
+    <button class="auth-btn" onclick="doAuth()">はじめる</button>
+    <div class="auth-switch" onclick="toggleAuth()" id="authSwitch">アカウントを作成する</div>
+  </div>
 </div>
 
-<div class="my-section">
-  <div class="my-label">あなたの名前と気分</div>
-  <input class="name-input" id="nameInput" placeholder="名前を入力..." maxlength="10">
+<!-- メイン画面 -->
+<div id="mainScreen" class="main-screen">
+  <div class="header">
+    <h1>気分シェア 🌀</h1>
+    <p>Kimochi Share</p>
+    <button class="logout-btn" onclick="logout()">ログアウト</button>
+  </div>
 
-  <div class="mood-grid">
-    <div class="mood-btn" onclick="selectMood('遊びたい', '🎮')">
-      <span class="mood-emoji">🎮</span>
-      <span class="mood-label">遊びたい</span>
+  <div class="profile-section">
+    <div class="avatar-wrapper" onclick="document.getElementById('avatarInput').click()">
+      <div class="avatar" id="myAvatar">👤</div>
+      <div class="avatar-edit">✎</div>
     </div>
-    <div class="mood-btn" onclick="selectMood('暇！', '👀')">
-      <span class="mood-emoji">👀</span>
-      <span class="mood-label">暇！</span>
-    </div>
-    <div class="mood-btn" onclick="selectMood('寂しい', '🥺')">
-      <span class="mood-emoji">🥺</span>
-      <span class="mood-label">寂しい</span>
-    </div>
-    <div class="mood-btn" onclick="selectMood('調子悪い', '😞')">
-      <span class="mood-emoji">😞</span>
-      <span class="mood-label">調子悪い</span>
-    </div>
-    <div class="mood-btn" onclick="selectMood('元気！', '🔥')">
-      <span class="mood-emoji">🔥</span>
-      <span class="mood-label">元気！</span>
-    </div>
-    <div class="mood-btn" onclick="selectMood('眠い…', '😴')">
-      <span class="mood-emoji">😴</span>
-      <span class="mood-label">眠い…</span>
-    </div>
-    <div class="mood-btn" onclick="selectMood('ごはん行きたい', '🍜')">
-      <span class="mood-emoji">🍜</span>
-      <span class="mood-label">ごはん行きたい</span>
-    </div>
-    <div class="mood-btn" onclick="selectMood('仕事中', '💼')">
-      <span class="mood-emoji">💼</span>
-      <span class="mood-label">仕事中</span>
-    </div>
-    <div class="mood-btn" onclick="selectMood('連絡して', '📱')">
-      <span class="mood-emoji">📱</span>
-      <span class="mood-label">連絡して</span>
+    <input type="file" id="avatarInput" accept="image/*" onchange="updateAvatar(event)">
+    <div>
+      <div class="profile-name" id="myNameDisplay"></div>
+      <div class="profile-sub">アイコンをタップして変更</div>
     </div>
   </div>
 
-  <button class="share-btn" id="shareBtn" onclick="shareMood()" disabled>気分をシェア！</button>
-</div>
+  <div class="my-section">
+    <div class="my-label">今の気分は？</div>
+    <div class="mood-grid">
+      <div class="mood-btn" onclick="selectMood(this, '遊びたい', '🎮')"><span class="mood-emoji">🎮</span><span class="mood-label">遊びたい</span></div>
+      <div class="mood-btn" onclick="selectMood(this, '暇！', '👀')"><span class="mood-emoji">👀</span><span class="mood-label">暇！</span></div>
+      <div class="mood-btn" onclick="selectMood(this, '忙しい', '😤')"><span class="mood-emoji">😤</span><span class="mood-label">忙しい</span></div>
+      <div class="mood-btn" onclick="selectMood(this, '調子悪い', '😞')"><span class="mood-emoji">😞</span><span class="mood-label">調子悪い</span></div>
+      <div class="mood-btn" onclick="selectMood(this, '元気！', '🔥')"><span class="mood-emoji">🔥</span><span class="mood-label">元気！</span></div>
+      <div class="mood-btn" onclick="selectMood(this, '眠い…', '😴')"><span class="mood-emoji">😴</span><span class="mood-label">眠い…</span></div>
+      <div class="mood-btn" onclick="selectMood(this, 'ごはん行きたい', '🍜')"><span class="mood-emoji">🍜</span><span class="mood-label">ごはん行きたい</span></div>
+      <div class="mood-btn" onclick="selectMood(this, '仕事中', '💼')"><span class="mood-emoji">💼</span><span class="mood-label">仕事中</span></div>
+      <div class="mood-btn" onclick="selectMood(this, '疲れた', '😩')"><span class="mood-emoji">😩</span><span class="mood-label">疲れた</span></div>
+    </div>
+    <textarea class="tweet-input" id="tweetInput" placeholder="一言つぶやく...（任意）" maxlength="100"></textarea>
+    <button class="share-btn" id="shareBtn" onclick="shareMood()" disabled>気分をシェア！</button>
+  </div>
 
-<div class="friends-section">
-  <div class="friends-label">みんなの気分</div>
-  <div id="friendsList"><div class="empty-msg">読み込み中...</div></div>
+  <div class="friends-section">
+    <div class="friends-label">みんなの気分</div>
+    <div id="friendsList"><div class="empty-msg">読み込み中...</div></div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getDatabase, ref, set, onValue, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+  import { getDatabase, ref, set, get, onValue, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBE5QU_9X4laOjCLIuXUqj3Z8O-rfW3D-M",
@@ -153,81 +161,218 @@
     projectId: "kimochi-share",
     storageBucket: "kimochi-share.firebasestorage.app",
     messagingSenderId: "957226642091",
-    appId: "1:957226642091:web:b3e57f7330e9ba8fd525ee",
-    measurementId: "G-E3PY3WEL1G"
+    appId: "1:957226642091:web:b3e57f7330e9ba8fd525ee"
   };
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  let selectedMood = '';
-  let selectedEmoji = '';
+  var currentUser = null;
+  var isLogin = true;
+  var selectedMood = "";
+  var selectedEmoji = "";
 
-  window.selectMood = function(mood, emoji) {
-    selectedMood = mood;
-    selectedEmoji = emoji;
-    document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected'));
-    event.currentTarget.classList.add('selected');
-    checkShareBtn();
+  // ローカルストレージからユーザー情報復元
+  var saved = localStorage.getItem("kimochi_user");
+  if (saved) {
+    currentUser = JSON.parse(saved);
+    showMain();
+  }
+
+  window.toggleAuth = function() {
+    isLogin = !isLogin;
+    document.getElementById("authTitle").textContent = isLogin ? "ログイン" : "アカウント作成";
+    document.getElementById("authSwitch").textContent = isLogin ? "アカウントを作成する" : "ログインする";
   };
 
-  document.getElementById('nameInput').addEventListener('input', checkShareBtn);
+  window.doAuth = async function() {
+    var name = document.getElementById("authName").value.trim();
+    var pass = document.getElementById("authPass").value.trim();
+    if (!name || !pass) { showToast("名前とパスワードを入力してください"); return; }
 
-  function checkShareBtn() {
-    const name = document.getElementById('nameInput').value.trim();
-    document.getElementById('shareBtn').disabled = !(name && selectedMood);
+    try {
+      var userRef = ref(db, "users/" + name);
+      var snap = await get(userRef);
+
+      if (isLogin) {
+        if (!snap.exists()) { showToast("アカウントが見つかりません"); return; }
+        var data = snap.val();
+        if (data.password !== pass) { showToast("パスワードが違います"); return; }
+        currentUser = { name: name, avatar: data.avatar || "" };
+      } else {
+        if (snap.exists()) { showToast("この名前はすでに使われています"); return; }
+        await set(userRef, { password: pass, avatar: "", createdAt: Date.now() });
+        currentUser = { name: name, avatar: "" };
+      }
+
+      localStorage.setItem("kimochi_user", JSON.stringify(currentUser));
+      showMain();
+    } catch(e) {
+      showToast("エラーが発生しました");
+    }
+  };
+
+  window.logout = function() {
+    localStorage.removeItem("kimochi_user");
+    currentUser = null;
+    document.getElementById("authScreen").style.display = "block";
+    document.getElementById("mainScreen").style.display = "none";
+  };
+
+  function showMain() {
+    document.getElementById("authScreen").style.display = "none";
+    document.getElementById("mainScreen").style.display = "block";
+    document.getElementById("myNameDisplay").textContent = currentUser.name;
+    if (currentUser.avatar) {
+      document.getElementById("myAvatar").innerHTML = '<img src="' + currentUser.avatar + '">';
+    }
+    loadFriends();
+  }
+
+  window.updateAvatar = function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = async function(ev) {
+      var avatarData = ev.target.result;
+      currentUser.avatar = avatarData;
+      localStorage.setItem("kimochi_user", JSON.stringify(currentUser));
+      document.getElementById("myAvatar").innerHTML = '<img src="' + avatarData + '">';
+      await set(ref(db, "users/" + currentUser.name + "/avatar"), avatarData);
+      showToast("アイコンを更新しました！");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  window.selectMood = function(el, mood, emoji) {
+    selectedMood = mood;
+    selectedEmoji = emoji;
+    document.querySelectorAll(".mood-btn").forEach(function(b) { b.classList.remove("selected"); });
+    el.classList.add("selected");
+    checkShare();
+  };
+
+  document.getElementById("tweetInput").addEventListener("input", checkShare);
+
+  function checkShare() {
+    document.getElementById("shareBtn").disabled = !selectedMood;
   }
 
   window.shareMood = async function() {
-    const name = document.getElementById('nameInput').value.trim();
-    if (!name || !selectedMood) return;
-
+    if (!selectedMood || !currentUser) return;
+    var tweet = document.getElementById("tweetInput").value.trim();
     try {
-      await set(ref(db, 'moods/' + name), {
-        name: name,
+      await set(ref(db, "moods/" + currentUser.name), {
+        name: currentUser.name,
         mood: selectedMood,
         emoji: selectedEmoji,
+        tweet: tweet,
+        avatar: currentUser.avatar || "",
         timestamp: Date.now()
       });
-      showToast('シェアしました！');
+      document.getElementById("tweetInput").value = "";
+      showToast("シェアしました！");
     } catch(e) {
-      showToast('エラーが発生しました');
+      showToast("エラーが発生しました");
     }
   };
 
-  // リアルタイム更新
-  onValue(ref(db, 'moods'), (snapshot) => {
-    const data = snapshot.val();
-    const list = document.getElementById('friendsList');
+  function loadFriends() {
+    onValue(ref(db, "moods"), function(snapshot) {
+      var data = snapshot.val();
+      var list = document.getElementById("friendsList");
+      if (!data) {
+        list.innerHTML = '<div class="empty-msg">まだ誰もいません👀<br>最初にシェアしよう！</div>';
+        return;
+      }
 
-    if (!data) {
-      list.innerHTML = '<div class="empty-msg">まだ誰もいません👀<br>最初にシェアしよう！</div>';
-      return;
+      var now = Date.now();
+      var limit = 24 * 60 * 60 * 1000; // 24時間
+
+      var entries = Object.values(data).filter(function(e) {
+        return (now - e.timestamp) < limit;
+      }).sort(function(a, b) { return b.timestamp - a.timestamp; });
+
+      if (entries.length === 0) {
+        list.innerHTML = '<div class="empty-msg">まだ誰もいません👀</div>';
+        return;
+      }
+
+      list.innerHTML = entries.map(function(entry) {
+        var mins = Math.floor((now - entry.timestamp) / 60000);
+        var timeStr = mins < 1 ? "たった今" : mins < 60 ? mins + "分前" : Math.floor(mins/60) + "時間前";
+        var avatarHtml = entry.avatar
+          ? '<div class="friend-avatar"><img src="' + entry.avatar + '"></div>'
+          : '<div class="friend-avatar">' + entry.emoji + '</div>';
+        var tweetHtml = entry.tweet ? '<div class="tweet-text">💬 ' + entry.tweet + '</div>' : "";
+        var isMe = currentUser && entry.name === currentUser.name;
+
+        return '<div class="friend-card" id="card-' + entry.name + '">' +
+          '<div class="friend-top">' +
+          avatarHtml +
+          '<div class="friend-info">' +
+          '<div class="friend-name">' + entry.name + (isMe ? " (自分)" : "") + '</div>' +
+          '<div class="friend-mood">' + entry.emoji + " " + entry.mood + '</div>' +
+          '<div class="friend-time">' + timeStr + '</div>' +
+          '</div>' +
+          '<div class="friend-emoji-big">' + entry.emoji + '</div>' +
+          '</div>' +
+          tweetHtml +
+          '<div class="comments-section" id="comments-' + entry.name + '"></div>' +
+          '<div class="comment-input-row">' +
+          '<input class="comment-input" id="cinput-' + entry.name + '" placeholder="コメントする...">' +
+          '<button class="comment-send" onclick="sendComment(\'' + entry.name + '\')">送信</button>' +
+          '</div>' +
+          '</div>';
+      }).join("");
+
+      // コメント読み込み
+      entries.forEach(function(entry) {
+        loadComments(entry.name);
+      });
+    });
+  }
+
+  function loadComments(targetName) {
+    onValue(ref(db, "comments/" + targetName), function(snap) {
+      var data = snap.val();
+      var el = document.getElementById("comments-" + targetName);
+      if (!el) return;
+      if (!data) { el.innerHTML = ""; return; }
+      var comments = Object.values(data).sort(function(a,b) { return a.timestamp - b.timestamp; });
+      el.innerHTML = comments.map(function(c) {
+        var avHtml = c.avatar
+          ? '<div class="comment-avatar"><img src="' + c.avatar + '"></div>'
+          : '<div class="comment-avatar">👤</div>';
+        return '<div class="comment-item">' + avHtml +
+          '<div class="comment-body"><div class="comment-name">' + c.name + '</div><div class="comment-text">' + c.text + '</div></div></div>';
+      }).join("");
+    });
+  }
+
+  window.sendComment = async function(targetName) {
+    if (!currentUser) return;
+    var input = document.getElementById("cinput-" + targetName);
+    var text = input.value.trim();
+    if (!text) return;
+    try {
+      await push(ref(db, "comments/" + targetName), {
+        name: currentUser.name,
+        text: text,
+        avatar: currentUser.avatar || "",
+        timestamp: Date.now()
+      });
+      input.value = "";
+    } catch(e) {
+      showToast("エラーが発生しました");
     }
-
-    const entries = Object.values(data).sort((a, b) => b.timestamp - a.timestamp);
-
-    list.innerHTML = entries.map(entry => {
-      const mins = Math.floor((Date.now() - entry.timestamp) / 60000);
-      const timeStr = mins < 1 ? 'たった今' : mins < 60 ? mins + '分前' : Math.floor(mins/60) + '時間前';
-      return `
-        <div class="friend-card">
-          <div class="friend-emoji">${entry.emoji}</div>
-          <div class="friend-info">
-            <div class="friend-name">${entry.name}</div>
-            <div class="friend-mood">${entry.mood}</div>
-            <div class="friend-time">${timeStr}</div>
-          </div>
-        </div>
-      `;
-    }).join('');
-  });
+  };
 
   function showToast(msg) {
-    const t = document.getElementById('toast');
+    var t = document.getElementById("toast");
     t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2500);
+    t.classList.add("show");
+    setTimeout(function() { t.classList.remove("show"); }, 2500);
   }
 </script>
 </body>
