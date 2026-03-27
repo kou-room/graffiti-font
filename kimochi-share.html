@@ -262,6 +262,7 @@
     if (!selectedMood || !currentUser) return;
     var tweet = document.getElementById("tweetInput").value.trim();
     try {
+      // 新しい気分をセット
       await set(ref(db, "moods/" + currentUser.name), {
         name: currentUser.name,
         mood: selectedMood,
@@ -270,6 +271,8 @@
         avatar: currentUser.avatar || "",
         timestamp: Date.now()
       });
+      // 古いコメントを削除
+      await set(ref(db, "comments/" + currentUser.name), null);
       document.getElementById("tweetInput").value = "";
       showToast("シェアしました！");
     } catch(e) {
@@ -326,15 +329,23 @@
           '</div>';
       }).join("");
 
-      // コメント読み込み
+      // コメント読み込み（全リスナーをリセットしてから再登録）
+      Object.keys(commentListeners).forEach(function(name) {
+        if (commentListeners[name]) {
+          commentListeners[name]();
+          delete commentListeners[name];
+        }
+      });
       entries.forEach(function(entry) {
         loadComments(entry.name);
       });
     });
   }
 
+  var commentListeners = {};
+
   function loadComments(targetName) {
-    onValue(ref(db, "comments/" + targetName), function(snap) {
+    var unsubscribe = onValue(ref(db, "comments/" + targetName), function(snap) {
       var data = snap.val();
       var el = document.getElementById("comments-" + targetName);
       if (!el) return;
@@ -348,6 +359,7 @@
           '<div class="comment-body"><div class="comment-name">' + c.name + '</div><div class="comment-text">' + c.text + '</div></div></div>';
       }).join("");
     });
+    commentListeners[targetName] = unsubscribe;
   }
 
   window.sendComment = async function(targetName) {
