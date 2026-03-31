@@ -88,6 +88,10 @@
     .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1a1a1a; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 12px; border: 1px solid #333; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; z-index: 999; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+    .reply-name { color: #aaa; cursor: pointer; font-size: 11px; text-decoration: underline; }
+    .reply-name:active { color: #fff; }
+    .reply-tag { min-height: 0; }
+    .reply-tag-text { font-size: 11px; color: #888; background: #1e1e1e; padding: 4px 10px; border-radius: 12px; display: inline-block; margin-bottom: 6px; }
     input[type="file"] { display: none; }
 
     /* 管理者ボタン */
@@ -96,6 +100,15 @@
     .comment-admin-btns { display: flex; gap: 4px; margin-left: 4px; }
     .admin-small-btn { background: #1a1a1a; border: 1px solid #333; color: #888; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer; }
     .admin-small-btn:active { background: #333; }
+
+    /* 返信機能 */
+    .reply-name { color: #aaa; font-size: 11px; cursor: pointer; text-decoration: underline; }
+    .reply-name:active { color: #fff; }
+    .reply-tag-text { display: inline-block; background: #2a2a2a; border-radius: 12px; padding: 4px 10px; font-size: 11px; color: #aaa; margin-bottom: 6px; }
+
+    /* 通知ボタン */
+    .notif-btn { background: #1a1a1a; border: 1px solid #2a2a2a; color: #666; padding: 8px 14px; border-radius: 8px; font-size: 11px; cursor: pointer; width: 100%; margin-bottom: 10px; }
+    .notif-btn.on { border-color: #fff; color: #fff; }
   </style>
 </head>
 <body>
@@ -126,10 +139,13 @@
       <div class="avatar-edit">✎</div>
     </div>
     <input type="file" id="avatarInput" accept="image/*" onchange="updateAvatar(event)">
-    <div>
+    <div style="flex:1;">
       <div class="profile-name" id="myNameDisplay"></div>
       <div class="profile-sub">アイコンをタップして変更</div>
     </div>
+  </div>
+  <div style="padding: 0 20px 10px;">
+    <button class="notif-btn" id="notifBtn" onclick="toggleNotification()">🔔 通知をオンにする</button>
   </div>
 
   <div class="my-section">
@@ -335,6 +351,7 @@
           tweetHtml +
           adminBtn +
           '<div class="comments-section" id="comments-' + entry.name + '"></div>' +
+          '<div class="reply-tag" id="reply-' + entry.name + '"></div>' +
           '<div class="comment-input-row">' +
           '<input class="comment-input" id="cinput-' + entry.name + '" placeholder="コメントする...">' +
           '<button class="comment-send" onclick="sendComment(\'' + entry.name + '\')">送信</button>' +
@@ -377,9 +394,10 @@
             '<button class="admin-small-btn" onclick="adminDeleteComment(\'' + targetName + '\',\'' + key + '\')">🗑</button>' +
             '</div>'
           : "";
+        var replyBtn = '<span class="reply-name" onclick="setReply(\'' + targetName + '\',\'' + c.name + '\')">' + c.name + '</span>';
         return '<div class="comment-item">' + avHtml +
           '<div class="comment-body">' +
-          '<div class="comment-name">' + c.name + '</div>' +
+          '<div class="comment-name">' + replyBtn + '</div>' +
           '<div class="comment-text">' + c.text + '</div>' +
           '</div>' +
           adminBtns +
@@ -388,6 +406,24 @@
     });
     commentListeners[targetName] = unsubscribe;
   }
+
+  window.setReply = function(targetName, replyToName) {
+    var input = document.getElementById("cinput-" + targetName);
+    var replyTag = document.getElementById("reply-" + targetName);
+    if (!input) return;
+    input.value = "@" + replyToName + " ";
+    input.focus();
+    if (replyTag) {
+      replyTag.innerHTML = '<span class="reply-tag-text">↩️ ' + replyToName + ' への返信 <span style="cursor:pointer;" onclick="clearReply(\'' + targetName + '\')">✕</span></span>';
+    }
+  };
+
+  window.clearReply = function(targetName) {
+    var input = document.getElementById("cinput-" + targetName);
+    var replyTag = document.getElementById("reply-" + targetName);
+    if (input) input.value = "";
+    if (replyTag) replyTag.innerHTML = "";
+  };
 
   // 管理者機能
   window.adminDeletePost = async function(name) {
@@ -415,9 +451,42 @@
     } catch(e) { showToast("エラーが発生しました"); }
   };
 
+  // 通知機能
+  var notifPermission = false;
+  async function requestNotification() {
+    if (!("Notification" in window)) return;
+    if (Notification.permission === "granted") {
+      notifPermission = true;
+      var btn = document.getElementById("notifBtn");
+      if (btn) { btn.textContent = "🔔 通知オン"; btn.classList.add("on"); }
+      return;
+    }
+    if (Notification.permission !== "denied") {
+      var perm = await Notification.requestPermission();
+      notifPermission = perm === "granted";
+      var btn = document.getElementById("notifBtn");
+      if (btn) {
+        btn.textContent = notifPermission ? "🔔 通知オン" : "🔕 通知オフ";
+        if (notifPermission) btn.classList.add("on");
+      }
+    }
+  }
+
+  window.toggleNotification = async function() {
+    await requestNotification();
+    if (!notifPermission) showToast("通知が許可されませんでした。設定から許可してください");
+    else showToast("通知をオンにしました！");
+  };
+
+  function sendNotif(title, body) {
+    if (!notifPermission) return;
+    try { new Notification(title, { body: body, icon: "https://kou-room.github.io/graffiti-font/kimochi-share.html" }); } catch(e) {}
+  }
+
   window.sendComment = async function(targetName) {
     if (!currentUser) return;
     var input = document.getElementById("cinput-" + targetName);
+    var replyTag = document.getElementById("reply-" + targetName);
     var text = input.value.trim();
     if (!text) return;
     try {
@@ -428,6 +497,11 @@
         timestamp: Date.now()
       });
       input.value = "";
+      if (replyTag) replyTag.innerHTML = "";
+      // 自分の投稿へのコメントなら通知しない、他人の投稿へは通知
+      if (targetName !== currentUser.name) {
+        sendNotif("気分シェア", currentUser.name + "が" + targetName + "にコメントしました");
+      }
     } catch(e) {
       showToast("エラーが発生しました");
     }
