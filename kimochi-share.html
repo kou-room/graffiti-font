@@ -53,6 +53,37 @@
     .share-btn:active { background: #ccc; }
     .share-btn:disabled { background: #2a2a2a; color: #555; cursor: not-allowed; }
 
+    /* 投稿ボタン */
+    .post-btn { width: 100%; padding: 14px; background: #1a1a1a; color: #aaa; border: 1px solid #2a2a2a; border-radius: 10px; font-size: 13px; font-weight: 700; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; margin-top: 8px; }
+    .post-btn:active { background: #222; }
+    .post-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* プロフィールモーダル */
+    .profile-modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9998;
+      overflow-y: auto; padding: 0 0 40px;
+    }
+    .profile-modal-header {
+      display: flex; align-items: center; gap: 14px; padding: 20px;
+      border-bottom: 1px solid #1e1e1e; position: sticky; top: 0;
+      background: #0f0f0f; z-index: 1;
+    }
+    .profile-modal-avatar { width: 56px; height: 56px; border-radius: 50%; background: #2a2a2a; display: flex; align-items: center; justify-content: center; font-size: 24px; overflow: hidden; flex-shrink: 0; }
+    .profile-modal-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .profile-modal-name { font-size: 18px; font-weight: 700; }
+    .profile-modal-close { margin-left: auto; background: #1a1a1a; border: 1px solid #2a2a2a; color: #888; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+    .profile-modal-posts { padding: 16px 20px; }
+    .profile-modal-label { font-size: 10px; color: #555; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 14px; }
+
+    /* 過去投稿カード */
+    .past-post-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+    .past-post-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .past-post-mood { font-size: 13px; color: #aaa; }
+    .past-post-time { font-size: 10px; color: #444; }
+    .past-post-tweet { font-size: 13px; color: #ccc; margin-top: 6px; }
+    .past-post-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-top: 8px; }
+    .past-post-del { background: none; border: none; color: #c00; font-size: 12px; cursor: pointer; padding: 4px 8px; }
+
     /* みんなの気分 */
     .friends-section { padding: 16px 20px; }
     .friends-label { font-size: 10px; color: #555; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 14px; }
@@ -195,11 +226,28 @@
     <input type="file" id="postImgInput" accept="image/*" onchange="previewPostImage(event)">
 
     <button class="share-btn" id="shareBtn" onclick="shareMood()" disabled>気分をシェア！</button>
+    <button class="post-btn" id="postBtn" onclick="createPost()" disabled>📌 投稿として保存</button>
   </div>
 
   <div class="friends-section">
     <div class="friends-label">みんなの気分</div>
     <div id="friendsList"><div class="empty-msg">読み込み中...</div></div>
+  </div>
+</div>
+
+<!-- プロフィールモーダル -->
+<div class="profile-modal" id="profileModal" style="display:none;">
+  <div class="profile-modal-header">
+    <div class="profile-modal-avatar" id="modalAvatar">👤</div>
+    <div>
+      <div class="profile-modal-name" id="modalName"></div>
+      <div style="font-size:11px;color:#555;margin-top:2px;">過去の投稿</div>
+    </div>
+    <button class="profile-modal-close" onclick="closeProfileModal()">✕ 閉じる</button>
+  </div>
+  <div class="profile-modal-posts">
+    <div class="profile-modal-label">投稿一覧</div>
+    <div id="modalPostsList"><div class="empty-msg">読み込み中...</div></div>
   </div>
 </div>
 
@@ -310,7 +358,9 @@
   document.getElementById("tweetInput").addEventListener("input", checkShare);
 
   function checkShare() {
-    document.getElementById("shareBtn").disabled = !selectedMood;
+    var ok = !!selectedMood;
+    document.getElementById("shareBtn").disabled = !ok;
+    document.getElementById("postBtn").disabled = !ok;
   }
 
   var postImageData = null;
@@ -350,6 +400,96 @@
     postImageData = null;
     document.getElementById('imgPreviewWrap').innerHTML = '<span>📷 画像を追加（任意）</span>';
     document.getElementById('postImgInput').value = '';
+  };
+
+  // 投稿として永久保存
+  window.createPost = async function() {
+    if (!selectedMood || !currentUser) return;
+    var tweet = document.getElementById("tweetInput").value.trim();
+    try {
+      await push(ref(db, "posts/" + currentUser.name), {
+        name: currentUser.name,
+        mood: selectedMood,
+        emoji: selectedEmoji,
+        tweet: tweet,
+        image: postImageData || "",
+        avatar: currentUser.avatar || "",
+        timestamp: Date.now()
+      });
+      document.getElementById("tweetInput").value = "";
+      postImageData = null;
+      document.getElementById('imgPreviewWrap').innerHTML = '<span>📷 画像を追加（任意）</span>';
+      document.getElementById('postImgInput').value = '';
+      showToast("投稿しました！📌");
+    } catch(e) {
+      showToast("エラーが発生しました");
+    }
+  };
+
+  // プロフィールモーダル
+  var currentModalName = null;
+  var postsListener = null;
+
+  window.openProfileModal = function(name, avatar) {
+    currentModalName = name;
+    document.getElementById("profileModal").style.display = "block";
+    document.getElementById("modalName").textContent = name;
+    var av = document.getElementById("modalAvatar");
+    av.innerHTML = avatar ? '<img src="' + avatar + '">' : '👤';
+    loadPosts(name);
+  };
+
+  window.closeProfileModal = function() {
+    document.getElementById("profileModal").style.display = "none";
+    if (postsListener) { postsListener(); postsListener = null; }
+  };
+
+  function loadPosts(name) {
+    var list = document.getElementById("modalPostsList");
+    list.innerHTML = '<div class="empty-msg">読み込み中...</div>';
+    if (postsListener) { postsListener(); }
+
+    var isAdmin = currentUser && currentUser.name === "こうすけ";
+    var isOwn = currentUser && currentUser.name === name;
+
+    postsListener = onValue(ref(db, "posts/" + name), function(snap) {
+      var data = snap.val();
+      if (!data) {
+        list.innerHTML = '<div class="empty-msg">まだ投稿がありません</div>';
+        return;
+      }
+      var posts = Object.entries(data).sort(function(a,b) { return b[1].timestamp - a[1].timestamp; });
+      var now = Date.now();
+      list.innerHTML = posts.map(function(entry) {
+        var key = entry[0];
+        var p = entry[1];
+        var mins = Math.floor((now - p.timestamp) / 60000);
+        var timeStr = mins < 60 ? mins + "分前" : mins < 1440 ? Math.floor(mins/60) + "時間前" : Math.floor(mins/1440) + "日前";
+        var imgHtml = p.image ? '<img class="past-post-img" src="' + p.image + '">' : "";
+        var delBtn = (isOwn || isAdmin)
+          ? '<button class="past-post-del" onclick="deletePost(\'' + name + '\',\'' + key + '\')">🗑 削除</button>'
+          : "";
+        return '<div class="past-post-card">' +
+          '<div class="past-post-top">' +
+          '<span class="past-post-mood">' + p.emoji + ' ' + p.mood + '</span>' +
+          '<span class="past-post-time">' + timeStr + '</span>' +
+          '</div>' +
+          (p.tweet ? '<div class="past-post-tweet">💬 ' + p.tweet + '</div>' : '') +
+          imgHtml +
+          delBtn +
+          '</div>';
+      }).join("");
+    });
+  }
+
+  window.deletePost = async function(name, key) {
+    if (!confirm("この投稿を削除しますか？")) return;
+    try {
+      await set(ref(db, "posts/" + name + "/" + key), null);
+      showToast("投稿を削除しました");
+    } catch(e) {
+      showToast("エラーが発生しました");
+    }
   };
 
   window.shareMood = async function() {
