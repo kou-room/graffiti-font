@@ -116,6 +116,21 @@
 
     .empty-msg { text-align: center; color: #333; font-size: 13px; padding: 32px 0; }
 
+    /* 今日の質問 */
+    .question-section { padding: 16px 20px; border-bottom: 1px solid #1e1e1e; background: #111; }
+    .question-label { font-size: 10px; color: #555; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; }
+    .question-text { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 12px; line-height: 1.5; }
+    .question-answers { margin-bottom: 10px; }
+    .question-answer-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #1e1e1e; }
+    .question-answer-avatar { width: 28px; height: 28px; border-radius: 50%; background: #2a2a2a; display: flex; align-items: center; justify-content: center; font-size: 12px; overflow: hidden; flex-shrink: 0; }
+    .question-answer-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .question-answer-name { font-size: 11px; color: #888; min-width: 60px; }
+    .question-answer-text { font-size: 13px; color: #ddd; flex: 1; }
+    .question-input-row { display: flex; gap: 8px; }
+    .question-input { flex: 1; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 20px; color: #ddd; font-size: 13px; padding: 10px 14px; outline: none; font-family: inherit; }
+    .question-input::placeholder { color: #333; }
+    .question-send { background: #fff; color: #000; border: none; border-radius: 20px; padding: 10px 16px; font-size: 12px; font-weight: 700; cursor: pointer; }
+
     .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1a1a1a; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 12px; border: 1px solid #333; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; z-index: 999; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
@@ -197,6 +212,17 @@
   </div>
   <div style="padding: 0 20px 10px;">
     <button class="notif-btn" id="notifBtn" onclick="toggleNotification()">🔔 通知をオンにする</button>
+  </div>
+
+  <!-- 今日の質問 -->
+  <div class="question-section" id="questionSection">
+    <div class="question-label">💬 今日の質問</div>
+    <div class="question-text" id="questionText">読み込み中...</div>
+    <div class="question-answers" id="questionAnswers"></div>
+    <div class="question-input-row">
+      <input class="question-input" id="questionInput" placeholder="回答を入力...">
+      <button class="question-send" onclick="sendAnswer()">送信</button>
+    </div>
   </div>
 
   <div class="my-section">
@@ -330,6 +356,7 @@
       document.getElementById("myAvatar").innerHTML = '<img src="' + currentUser.avatar + '">';
     }
     loadFriends();
+    loadQuestion();
   }
 
   window.updateAvatar = function(e) {
@@ -639,6 +666,73 @@
     var replyTag = document.getElementById("reply-" + targetName);
     if (input) input.value = "";
     if (replyTag) replyTag.innerHTML = "";
+  };
+
+  // 今日の質問
+  var questions = [
+    "今日一番笑ったことは？😂",
+    "最近ハマってるものは？🔥",
+    "今食べたいものは何？🍜",
+    "今日の気分を一言で表すと？💭",
+    "最近嬉しかったことは？😊",
+    "今一番行きたい場所は？🗺️",
+    "最近見た動画・映画は？🎬",
+    "今週頑張ったことは？💪",
+    "最近買って良かったものは？🛍️",
+    "今聴いてる曲は？🎵",
+    "今日誰かに言いたいことは？📢",
+    "最近の悩みは？🤔",
+    "今夜何したい？🌙",
+    "最近会いたい人は？👥",
+    "今日のラッキーカラーは？🎨"
+  ];
+
+  function getTodayQuestion() {
+    var today = new Date();
+    var dayIndex = today.getFullYear() * 366 + today.getMonth() * 31 + today.getDate();
+    return questions[dayIndex % questions.length];
+  }
+
+  function loadQuestion() {
+    var q = getTodayQuestion();
+    document.getElementById("questionText").textContent = q;
+
+    var todayKey = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+    onValue(ref(db, "questions/" + todayKey), function(snap) {
+      var data = snap.val();
+      var el = document.getElementById("questionAnswers");
+      if (!data) { el.innerHTML = ""; return; }
+      var answers = Object.values(data).sort(function(a,b) { return a.timestamp - b.timestamp; });
+      el.innerHTML = answers.map(function(a) {
+        var avHtml = a.avatar
+          ? '<div class="question-answer-avatar"><img src="' + a.avatar + '"></div>'
+          : '<div class="question-answer-avatar">👤</div>';
+        return '<div class="question-answer-item">' + avHtml +
+          '<span class="question-answer-name">' + a.name + '</span>' +
+          '<span class="question-answer-text">' + a.text + '</span>' +
+          '</div>';
+      }).join("");
+    });
+  }
+
+  window.sendAnswer = async function() {
+    if (!currentUser) return;
+    var input = document.getElementById("questionInput");
+    var text = input.value.trim();
+    if (!text) return;
+    var todayKey = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+    try {
+      await push(ref(db, "questions/" + todayKey), {
+        name: currentUser.name,
+        text: text,
+        avatar: currentUser.avatar || "",
+        timestamp: Date.now()
+      });
+      input.value = "";
+      showToast("回答しました！💬");
+    } catch(e) {
+      showToast("エラーが発生しました");
+    }
   };
 
   // 管理者機能
