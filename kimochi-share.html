@@ -204,7 +204,7 @@
       <div class="avatar" id="myAvatar">👤</div>
       <div class="avatar-edit">✎</div>
     </div>
-    <input type="file" id="avatarInput" accept="image/*" onchange="updateAvatar(event)">
+    <input type="file" id="avatarInput" accept="image/*" onchange="updateAvatar(event)" style="display:none;position:absolute;">
     <div style="flex:1;">
       <div class="profile-name" id="myNameDisplay"></div>
       <div class="profile-sub">アイコンをタップして変更</div>
@@ -249,7 +249,7 @@
         <span>📷 画像を追加（任意）</span>
       </div>
     </div>
-    <input type="file" id="postImgInput" accept="image/*" onchange="previewPostImage(event)">
+    <input type="file" id="postImgInput" accept="image/*" onchange="previewPostImage(event)" style="display:none;position:absolute;">
 
     <button class="share-btn" id="shareBtn" onclick="shareMood()" disabled>気分をシェア！</button>
     <button class="post-btn" id="postBtn" onclick="createPost()" disabled>📌 投稿として保存</button>
@@ -695,15 +695,17 @@
 
   function loadQuestion() {
     var q = getTodayQuestion();
-    document.getElementById("questionText").textContent = q;
+    var el = document.getElementById("questionText");
+    if (el) el.textContent = q;
 
     var todayKey = new Date().toISOString().slice(0, 10).replace(/-/g, "");
     onValue(ref(db, "questions/" + todayKey), function(snap) {
       var data = snap.val();
-      var el = document.getElementById("questionAnswers");
-      if (!data) { el.innerHTML = ""; return; }
+      var answersEl = document.getElementById("questionAnswers");
+      if (!answersEl) return;
+      if (!data) { answersEl.innerHTML = ""; return; }
       var answers = Object.values(data).sort(function(a,b) { return a.timestamp - b.timestamp; });
-      el.innerHTML = answers.map(function(a) {
+      answersEl.innerHTML = answers.map(function(a) {
         var avHtml = a.avatar
           ? '<div class="question-answer-avatar"><img src="' + a.avatar + '"></div>'
           : '<div class="question-answer-avatar">👤</div>';
