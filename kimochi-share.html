@@ -5,186 +5,130 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>気分シェア</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: rgba(0,0,0,0); }
     body { background: #0f0f0f; min-height: 100vh; font-family: -apple-system, sans-serif; color: #fff; }
 
     .header { text-align: center; padding: 28px 20px 16px; border-bottom: 1px solid #1e1e1e; position: relative; }
     .header h1 { font-size: 20px; font-weight: 700; letter-spacing: 2px; }
     .header p { font-size: 11px; color: #555; letter-spacing: 3px; text-transform: uppercase; margin-top: 4px; }
-    .logout-btn { position: absolute; right: 16px; top: 28px; background: #1a1a1a; border: 1px solid #2a2a2a; color: #666; padding: 6px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; }
+    .logout-btn { position: absolute; right: 16px; top: 28px; background: #1a1a1a; border: 1px solid #2a2a2a; color: #666; padding: 6px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; z-index: 1; }
 
-    /* ログイン画面 */
     .auth-screen { padding: 40px 20px; max-width: 480px; margin: 0 auto; }
     .auth-title { font-size: 18px; font-weight: 700; margin-bottom: 24px; text-align: center; }
     .auth-input { width: 100%; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; color: #fff; font-size: 15px; padding: 14px 16px; outline: none; margin-bottom: 12px; }
-    .auth-input:focus { border-color: #555; }
     .auth-btn { width: 100%; padding: 14px; background: #fff; color: #000; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; letter-spacing: 2px; cursor: pointer; margin-bottom: 10px; }
-    .auth-btn:active { background: #ccc; }
-    .auth-switch { text-align: center; color: #555; font-size: 12px; cursor: pointer; text-decoration: underline; }
+    .auth-switch { text-align: center; color: #555; font-size: 12px; cursor: pointer; text-decoration: underline; padding: 10px; }
 
-    /* メイン画面 */
     .main-screen { display: none; }
 
-    /* プロフィール設定 */
     .profile-section { padding: 16px 20px; border-bottom: 1px solid #1e1e1e; display: flex; align-items: center; gap: 14px; }
-    .avatar-wrapper { position: relative; cursor: pointer; }
-    .avatar { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid #2a2a2a; background: #1a1a1a; display: flex; align-items: center; justify-content: center; font-size: 22px; overflow: hidden; }
+    .avatar-wrapper { position: relative; cursor: pointer; flex-shrink: 0; }
+    .avatar { width: 52px; height: 52px; border-radius: 50%; border: 2px solid #2a2a2a; background: #1a1a1a; display: flex; align-items: center; justify-content: center; font-size: 22px; overflow: hidden; }
     .avatar img { width: 100%; height: 100%; object-fit: cover; }
     .avatar-edit { position: absolute; bottom: -2px; right: -2px; background: #fff; color: #000; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; display: flex; align-items: center; justify-content: center; }
     .profile-name { font-size: 16px; font-weight: 600; }
     .profile-sub { font-size: 11px; color: #555; margin-top: 2px; }
 
+    .notif-wrap { padding: 10px 20px; }
+    .notif-btn { background: #1a1a1a; border: 1px solid #2a2a2a; color: #666; padding: 8px 14px; border-radius: 8px; font-size: 11px; cursor: pointer; width: 100%; }
+    .notif-btn.on { border-color: #fff; color: #fff; }
+
+    .question-section { padding: 14px 20px; border-bottom: 1px solid #1e1e1e; background: #111; }
+    .question-label { font-size: 10px; color: #555; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+    .question-text { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 10px; line-height: 1.5; }
+    .question-answers { margin-bottom: 10px; }
+    .question-answer-item { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid #1e1e1e; }
+    .question-answer-avatar { width: 26px; height: 26px; border-radius: 50%; background: #2a2a2a; display: flex; align-items: center; justify-content: center; font-size: 11px; overflow: hidden; flex-shrink: 0; }
+    .question-answer-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .question-answer-name { font-size: 11px; color: #888; min-width: 50px; }
+    .question-answer-text { font-size: 12px; color: #ddd; flex: 1; }
+    .question-input-row { display: flex; gap: 8px; }
+    .question-input { flex: 1; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 20px; color: #ddd; font-size: 13px; padding: 10px 14px; outline: none; font-family: inherit; }
+    .question-send { background: #fff; color: #000; border: none; border-radius: 20px; padding: 10px 16px; font-size: 12px; font-weight: 700; cursor: pointer; }
+
     .my-section { padding: 16px 20px; border-bottom: 1px solid #1e1e1e; }
     .my-label { font-size: 10px; color: #555; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
 
     .mood-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
-    .mood-btn { background: #1a1a1a; border: 2px solid #2a2a2a; border-radius: 12px; padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.2s; }
-    .mood-btn:active { transform: scale(0.95); }
+    .mood-btn { background: #1a1a1a; border: 2px solid #2a2a2a; border-radius: 12px; padding: 12px 8px; text-align: center; cursor: pointer; position: relative; z-index: 1; }
     .mood-btn.selected { border-color: #fff; background: #2a2a2a; }
     .mood-emoji { font-size: 26px; display: block; margin-bottom: 4px; }
     .mood-label { font-size: 10px; color: #888; }
     .mood-btn.selected .mood-label { color: #fff; }
 
     .tweet-input { width: 100%; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; color: #ddd; font-size: 14px; padding: 12px 14px; outline: none; resize: none; height: 70px; margin-bottom: 12px; font-family: inherit; }
-    .tweet-input:focus { border-color: #444; }
     .tweet-input::placeholder { color: #333; }
 
-    .share-btn { width: 100%; padding: 14px; background: #fff; color: #000; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; }
-    .share-btn:active { background: #ccc; }
-    .share-btn:disabled { background: #2a2a2a; color: #555; cursor: not-allowed; }
+    .img-upload-area { border: 1px dashed #2a2a2a; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; margin-bottom: 12px; background: #111; color: #555; font-size: 13px; min-height: 48px; display: flex; align-items: center; justify-content: center; }
+    .post-img-preview { max-width: 100%; max-height: 180px; border-radius: 8px; object-fit: cover; }
+    .img-remove-btn { display: block; margin-top: 6px; background: none; border: none; color: #c00; font-size: 12px; cursor: pointer; }
 
-    /* 投稿ボタン */
-    .post-btn { width: 100%; padding: 14px; background: #1a1a1a; color: #aaa; border: 1px solid #2a2a2a; border-radius: 10px; font-size: 13px; font-weight: 700; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; margin-top: 8px; }
-    .post-btn:active { background: #222; }
+    .btn-row { display: flex; gap: 8px; }
+    .share-btn { flex: 1; padding: 14px; background: #fff; color: #000; border: none; border-radius: 10px; font-size: 12px; font-weight: 700; letter-spacing: 1px; cursor: pointer; }
+    .share-btn:disabled { background: #2a2a2a; color: #555; cursor: not-allowed; }
+    .post-btn { flex: 1; padding: 14px; background: #1a1a1a; color: #aaa; border: 1px solid #2a2a2a; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; }
     .post-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    /* プロフィールモーダル */
-    .profile-modal {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9998;
-      overflow-y: auto; padding: 0 0 40px;
-      visibility: hidden; opacity: 0; pointer-events: none;
-    }
-    .profile-modal.open {
-      visibility: visible; opacity: 1; pointer-events: auto;
-    }
-    .profile-modal-header {
-      display: flex; align-items: center; gap: 14px; padding: 20px;
-      border-bottom: 1px solid #1e1e1e; position: sticky; top: 0;
-      background: #0f0f0f; z-index: 1;
-    }
-    .profile-modal-avatar { width: 56px; height: 56px; border-radius: 50%; background: #2a2a2a; display: flex; align-items: center; justify-content: center; font-size: 24px; overflow: hidden; flex-shrink: 0; }
-    .profile-modal-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-    .profile-modal-name { font-size: 18px; font-weight: 700; }
-    .profile-modal-close { margin-left: auto; background: #1a1a1a; border: 1px solid #2a2a2a; color: #888; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; }
-    .profile-modal-posts { padding: 16px 20px; }
-    .profile-modal-label { font-size: 10px; color: #555; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 14px; }
-
-    /* 過去投稿カード */
-    .past-post-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
-    .past-post-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-    .past-post-mood { font-size: 13px; color: #aaa; }
-    .past-post-time { font-size: 10px; color: #444; }
-    .past-post-tweet { font-size: 13px; color: #ccc; margin-top: 6px; }
-    .past-post-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-top: 8px; }
-    .past-post-del { background: none; border: none; color: #c00; font-size: 12px; cursor: pointer; padding: 4px 8px; }
-
-    /* みんなの気分 */
     .friends-section { padding: 16px 20px; }
     .friends-label { font-size: 10px; color: #555; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 14px; }
 
     .friend-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
     .friend-top { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-    .friend-avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; background: #2a2a2a; display: flex; align-items: center; justify-content: center; font-size: 20px; overflow: hidden; flex-shrink: 0; }
+    .friend-avatar { width: 44px; height: 44px; border-radius: 50%; background: #2a2a2a; display: flex; align-items: center; justify-content: center; font-size: 20px; overflow: hidden; flex-shrink: 0; cursor: pointer; }
     .friend-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
     .friend-info { flex: 1; }
     .friend-name { font-size: 14px; font-weight: 600; }
     .friend-mood { font-size: 12px; color: #888; margin-top: 1px; }
     .friend-time { font-size: 10px; color: #444; margin-top: 2px; }
     .friend-emoji-big { font-size: 32px; }
-
     .tweet-text { font-size: 13px; color: #ccc; padding: 8px 0; border-top: 1px solid #2a2a2a; margin-top: 4px; }
+    .post-image { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-top: 8px; cursor: pointer; }
 
-    /* コメント */
     .comments-section { border-top: 1px solid #2a2a2a; margin-top: 8px; padding-top: 8px; }
-    .comment-item { display: flex; gap: 8px; margin-bottom: 6px; }
+    .comment-item { display: flex; gap: 8px; margin-bottom: 6px; align-items: flex-start; }
     .comment-avatar { width: 28px; height: 28px; border-radius: 50%; background: #2a2a2a; display: flex; align-items: center; justify-content: center; font-size: 12px; overflow: hidden; flex-shrink: 0; }
     .comment-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
     .comment-body { background: #222; border-radius: 8px; padding: 6px 10px; flex: 1; }
-    .comment-name { font-size: 10px; color: #888; margin-bottom: 2px; }
+    .comment-name { font-size: 10px; color: #888; margin-bottom: 2px; cursor: pointer; text-decoration: underline; }
     .comment-text { font-size: 12px; color: #ddd; }
+    .comment-admin-btns { display: flex; gap: 4px; margin-left: 4px; flex-shrink: 0; }
+    .admin-small-btn { background: #1a1a1a; border: 1px solid #333; color: #888; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer; }
 
     .comment-input-row { display: flex; gap: 8px; margin-top: 8px; }
     .comment-input { flex: 1; background: #222; border: 1px solid #2a2a2a; border-radius: 20px; color: #ddd; font-size: 12px; padding: 8px 12px; outline: none; font-family: inherit; }
-    .comment-input::placeholder { color: #333; }
     .comment-send { background: #fff; color: #000; border: none; border-radius: 20px; padding: 8px 14px; font-size: 11px; font-weight: 700; cursor: pointer; }
+
+    .admin-del-btn { background: #3a1a1a; border: 1px solid #c00; color: #ff6666; padding: 6px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; margin-top: 8px; width: 100%; }
 
     .empty-msg { text-align: center; color: #333; font-size: 13px; padding: 32px 0; }
 
-    /* 今日の質問 */
-    .question-section { padding: 16px 20px; border-bottom: 1px solid #1e1e1e; background: #111; }
-    .question-label { font-size: 10px; color: #555; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; }
-    .question-text { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 12px; line-height: 1.5; }
-    .question-answers { margin-bottom: 10px; }
-    .question-answer-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #1e1e1e; }
-    .question-answer-avatar { width: 28px; height: 28px; border-radius: 50%; background: #2a2a2a; display: flex; align-items: center; justify-content: center; font-size: 12px; overflow: hidden; flex-shrink: 0; }
-    .question-answer-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-    .question-answer-name { font-size: 11px; color: #888; min-width: 60px; }
-    .question-answer-text { font-size: 13px; color: #ddd; flex: 1; }
-    .question-input-row { display: flex; gap: 8px; }
-    .question-input { flex: 1; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 20px; color: #ddd; font-size: 13px; padding: 10px 14px; outline: none; font-family: inherit; }
-    .question-input::placeholder { color: #333; }
-    .question-send { background: #fff; color: #000; border: none; border-radius: 20px; padding: 10px 16px; font-size: 12px; font-weight: 700; cursor: pointer; }
+    .profile-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9998; overflow-y: auto; padding: 0 0 40px; visibility: hidden; pointer-events: none; }
+    .profile-modal.open { visibility: visible; pointer-events: auto; }
+    .profile-modal-header { display: flex; align-items: center; gap: 14px; padding: 20px; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; background: #0f0f0f; z-index: 1; }
+    .profile-modal-avatar { width: 56px; height: 56px; border-radius: 50%; background: #2a2a2a; display: flex; align-items: center; justify-content: center; font-size: 24px; overflow: hidden; flex-shrink: 0; }
+    .profile-modal-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .profile-modal-name { font-size: 18px; font-weight: 700; }
+    .profile-modal-close { margin-left: auto; background: #1a1a1a; border: 1px solid #2a2a2a; color: #888; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+    .profile-modal-posts { padding: 16px 20px; }
+    .profile-modal-label { font-size: 10px; color: #555; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 14px; }
+    .past-post-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+    .past-post-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .past-post-mood { font-size: 13px; color: #aaa; }
+    .past-post-time { font-size: 10px; color: #444; }
+    .past-post-tweet { font-size: 13px; color: #ccc; margin-top: 6px; }
+    .past-post-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-top: 8px; }
+    .past-post-del { background: none; border: none; color: #c00; font-size: 12px; cursor: pointer; padding: 4px 8px; margin-top: 6px; }
 
-    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1a1a1a; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 12px; border: 1px solid #333; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; z-index: 999; }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    .reply-name { color: #aaa; cursor: pointer; font-size: 11px; text-decoration: underline; }
-    .reply-name:active { color: #fff; }
-    .reply-tag { min-height: 0; }
-    .reply-tag-text { font-size: 11px; color: #888; background: #1e1e1e; padding: 4px 10px; border-radius: 12px; display: inline-block; margin-bottom: 6px; }
-    /* 画像投稿 */
-    .img-upload-area {
-      border: 1px dashed #2a2a2a; border-radius: 8px; padding: 12px;
-      text-align: center; cursor: pointer; margin-bottom: 12px;
-      background: #111; color: #555; font-size: 13px; min-height: 48px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .img-upload-area:active { border-color: #555; }
-    .post-img-preview { max-width: 100%; max-height: 180px; border-radius: 8px; object-fit: cover; }
-    .img-remove-btn { display: block; margin-top: 6px; background: none; border: none; color: #c00; font-size: 12px; cursor: pointer; }
-
-    /* 投稿画像表示 */
-    .post-image { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-top: 8px; cursor: pointer; }
-
-    /* 画像フルスクリーン */
-    .img-fullscreen {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999;
-      display: flex; align-items: center; justify-content: center; padding: 20px;
-      pointer-events: auto;
-    }
+    .img-fullscreen { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
     .img-fullscreen img { max-width: 100%; max-height: 90vh; border-radius: 8px; }
     .img-fullscreen-close { position: absolute; top: 20px; right: 20px; background: #333; color: #fff; border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 18px; cursor: pointer; }
 
-    /* 管理者ボタン */
-    .admin-del-btn { background: #3a1a1a; border: 1px solid #c00; color: #ff6666; padding: 6px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; margin-top: 8px; width: 100%; }
-    .admin-del-btn:active { background: #c00; color: #fff; }
-    .comment-admin-btns { display: flex; gap: 4px; margin-left: 4px; }
-    .admin-small-btn { background: #1a1a1a; border: 1px solid #333; color: #888; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer; }
-    .admin-small-btn:active { background: #333; }
-
-    /* 返信機能 */
-    .reply-name { color: #aaa; font-size: 11px; cursor: pointer; text-decoration: underline; }
-    .reply-name:active { color: #fff; }
-    .reply-tag-text { display: inline-block; background: #2a2a2a; border-radius: 12px; padding: 4px 10px; font-size: 11px; color: #aaa; margin-bottom: 6px; }
-
-    /* 通知ボタン */
-    .notif-btn { background: #1a1a1a; border: 1px solid #2a2a2a; color: #666; padding: 8px 14px; border-radius: 8px; font-size: 11px; cursor: pointer; width: 100%; margin-bottom: 10px; }
-    .notif-btn.on { border-color: #fff; color: #fff; }
+    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1a1a1a; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 12px; border: 1px solid #333; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; z-index: 9997; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   </style>
 </head>
 <body>
 
-<!-- ログイン画面 -->
 <div id="authScreen">
   <div class="header"><h1>気分シェア 🌀</h1><p>Kimochi Share</p></div>
   <div class="auth-screen">
@@ -196,7 +140,6 @@
   </div>
 </div>
 
-<!-- メイン画面 -->
 <div id="mainScreen" class="main-screen">
   <div class="header">
     <h1>気分シェア 🌀</h1>
@@ -209,20 +152,20 @@
       <div class="avatar" id="myAvatar">👤</div>
       <div class="avatar-edit">✎</div>
     </div>
-    <input type="file" id="avatarInput" accept="image/*" onchange="updateAvatar(event)" style="display:none;position:absolute;">
+    <input type="file" id="avatarInput" accept="image/*" onchange="updateAvatar(event)" style="display:none;position:absolute;left:-9999px;">
     <div style="flex:1;">
       <div class="profile-name" id="myNameDisplay"></div>
       <div class="profile-sub">アイコンをタップして変更</div>
     </div>
   </div>
-  <div style="padding: 0 20px 10px;">
+
+  <div class="notif-wrap">
     <button class="notif-btn" id="notifBtn" onclick="toggleNotification()">🔔 通知をオンにする</button>
   </div>
 
-  <!-- 今日の質問 -->
-  <div class="question-section" id="questionSection">
+  <div class="question-section">
     <div class="question-label">💬 今日の質問</div>
-    <div class="question-text" id="questionText">読み込み中...</div>
+    <div class="question-text" id="questionText"></div>
     <div class="question-answers" id="questionAnswers"></div>
     <div class="question-input-row">
       <input class="question-input" id="questionInput" placeholder="回答を入力...">
@@ -233,31 +176,28 @@
   <div class="my-section">
     <div class="my-label">今の気分は？</div>
     <div class="mood-grid">
-      <div class="mood-btn" onclick="selectMood(this, '遊びたい', '🎮')"><span class="mood-emoji">🎮</span><span class="mood-label">遊びたい</span></div>
-      <div class="mood-btn" onclick="selectMood(this, '暇！', '👀')"><span class="mood-emoji">👀</span><span class="mood-label">暇！</span></div>
-      <div class="mood-btn" onclick="selectMood(this, '忙しい', '😤')"><span class="mood-emoji">😤</span><span class="mood-label">忙しい</span></div>
-      <div class="mood-btn" onclick="selectMood(this, '調子悪い', '😞')"><span class="mood-emoji">😞</span><span class="mood-label">調子悪い</span></div>
-      <div class="mood-btn" onclick="selectMood(this, '元気！', '🔥')"><span class="mood-emoji">🔥</span><span class="mood-label">元気！</span></div>
-      <div class="mood-btn" onclick="selectMood(this, '眠い…', '😴')"><span class="mood-emoji">😴</span><span class="mood-label">眠い…</span></div>
-      <div class="mood-btn" onclick="selectMood(this, 'ごはん行きたい', '🍜')"><span class="mood-emoji">🍜</span><span class="mood-label">ごはん行きたい</span></div>
-      <div class="mood-btn" onclick="selectMood(this, '仕事中', '💼')"><span class="mood-emoji">💼</span><span class="mood-label">仕事中</span></div>
-      <div class="mood-btn" onclick="selectMood(this, '疲れた', '😩')"><span class="mood-emoji">😩</span><span class="mood-label">疲れた</span></div>
-      <div class="mood-btn" onclick="selectMood(this, 'お出かけ中', '🚶')"><span class="mood-emoji">🚶</span><span class="mood-label">お出かけ中</span></div>
-      <div class="mood-btn" onclick="selectMood(this, 'トレーニング', '💪')"><span class="mood-emoji">💪</span><span class="mood-label">トレーニング</span></div>
-      <div class="mood-btn" onclick="selectMood(this, 'ぴえん', '🥺')"><span class="mood-emoji">🥺</span><span class="mood-label">ぴえん</span></div>
+      <div class="mood-btn" onclick="selectMood(this,'遊びたい','🎮')"><span class="mood-emoji">🎮</span><span class="mood-label">遊びたい</span></div>
+      <div class="mood-btn" onclick="selectMood(this,'暇！','👀')"><span class="mood-emoji">👀</span><span class="mood-label">暇！</span></div>
+      <div class="mood-btn" onclick="selectMood(this,'忙しい','😤')"><span class="mood-emoji">😤</span><span class="mood-label">忙しい</span></div>
+      <div class="mood-btn" onclick="selectMood(this,'調子悪い','😞')"><span class="mood-emoji">😞</span><span class="mood-label">調子悪い</span></div>
+      <div class="mood-btn" onclick="selectMood(this,'元気！','🔥')"><span class="mood-emoji">🔥</span><span class="mood-label">元気！</span></div>
+      <div class="mood-btn" onclick="selectMood(this,'眠い…','😴')"><span class="mood-emoji">😴</span><span class="mood-label">眠い…</span></div>
+      <div class="mood-btn" onclick="selectMood(this,'ごはん行きたい','🍜')"><span class="mood-emoji">🍜</span><span class="mood-label">ごはん行きたい</span></div>
+      <div class="mood-btn" onclick="selectMood(this,'仕事中','💼')"><span class="mood-emoji">💼</span><span class="mood-label">仕事中</span></div>
+      <div class="mood-btn" onclick="selectMood(this,'疲れた','😩')"><span class="mood-emoji">😩</span><span class="mood-label">疲れた</span></div>
+      <div class="mood-btn" onclick="selectMood(this,'お出かけ中','🚶')"><span class="mood-emoji">🚶</span><span class="mood-label">お出かけ中</span></div>
+      <div class="mood-btn" onclick="selectMood(this,'トレーニング','💪')"><span class="mood-emoji">💪</span><span class="mood-label">トレーニング</span></div>
+      <div class="mood-btn" onclick="selectMood(this,'ぴえん','🥺')"><span class="mood-emoji">🥺</span><span class="mood-label">ぴえん</span></div>
     </div>
     <textarea class="tweet-input" id="tweetInput" placeholder="一言つぶやく...（任意）" maxlength="100"></textarea>
-
-    <!-- 画像投稿 -->
     <div class="img-upload-area" onclick="document.getElementById('postImgInput').click()">
-      <div id="imgPreviewWrap">
-        <span>📷 画像を追加（任意）</span>
-      </div>
+      <div id="imgPreviewWrap"><span>📷 画像を追加（任意）</span></div>
     </div>
-    <input type="file" id="postImgInput" accept="image/*" onchange="previewPostImage(event)" style="display:none;position:absolute;">
-
-    <button class="share-btn" id="shareBtn" onclick="shareMood()" disabled>気分をシェア！</button>
-    <button class="post-btn" id="postBtn" onclick="createPost()" disabled>📌 投稿として保存</button>
+    <input type="file" id="postImgInput" accept="image/*" onchange="previewPostImage(event)" style="display:none;position:absolute;left:-9999px;">
+    <div class="btn-row">
+      <button class="share-btn" id="shareBtn" onclick="shareMood()" disabled>気分をシェア！</button>
+      <button class="post-btn" id="postBtn" onclick="createPost()" disabled>📌 投稿</button>
+    </div>
   </div>
 
   <div class="friends-section">
@@ -266,7 +206,6 @@
   </div>
 </div>
 
-<!-- プロフィールモーダル -->
 <div class="profile-modal" id="profileModal">
   <div class="profile-modal-header">
     <div class="profile-modal-avatar" id="modalAvatar">👤</div>
@@ -278,7 +217,7 @@
   </div>
   <div class="profile-modal-posts">
     <div class="profile-modal-label">投稿一覧</div>
-    <div id="modalPostsList"><div class="empty-msg">読み込み中...</div></div>
+    <div id="modalPostsList"></div>
   </div>
 </div>
 
@@ -286,7 +225,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getDatabase, ref, set, get, onValue, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+  import { getDatabase, ref, set, get, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBE5QU_9X4laOjCLIuXUqj3Z8O-rfW3D-M",
@@ -305,14 +244,22 @@
   var isLogin = true;
   var selectedMood = "";
   var selectedEmoji = "";
+  var postImageData = null;
+  var commentListeners = {};
+  var postsListener = null;
 
-  // ローカルストレージからユーザー情報復元
+  // 起動時にローカルストレージから復元
   var saved = localStorage.getItem("kimochi_user");
   if (saved) {
-    currentUser = JSON.parse(saved);
-    showMain();
+    try {
+      currentUser = JSON.parse(saved);
+      showMain();
+    } catch(e) {
+      localStorage.removeItem("kimochi_user");
+    }
   }
 
+  // 認証
   window.toggleAuth = function() {
     isLogin = !isLogin;
     document.getElementById("authTitle").textContent = isLogin ? "ログイン" : "アカウント作成";
@@ -323,27 +270,21 @@
     var name = document.getElementById("authName").value.trim();
     var pass = document.getElementById("authPass").value.trim();
     if (!name || !pass) { showToast("名前とパスワードを入力してください"); return; }
-
     try {
       var userRef = ref(db, "users/" + name);
       var snap = await get(userRef);
-
       if (isLogin) {
         if (!snap.exists()) { showToast("アカウントが見つかりません"); return; }
-        var data = snap.val();
-        if (data.password !== pass) { showToast("パスワードが違います"); return; }
-        currentUser = { name: name, avatar: data.avatar || "" };
+        if (snap.val().password !== pass) { showToast("パスワードが違います"); return; }
+        currentUser = { name: name, avatar: snap.val().avatar || "" };
       } else {
         if (snap.exists()) { showToast("この名前はすでに使われています"); return; }
         await set(userRef, { password: pass, avatar: "", createdAt: Date.now() });
         currentUser = { name: name, avatar: "" };
       }
-
       localStorage.setItem("kimochi_user", JSON.stringify(currentUser));
       showMain();
-    } catch(e) {
-      showToast("エラーが発生しました");
-    }
+    } catch(e) { showToast("エラーが発生しました"); }
   };
 
   window.logout = function() {
@@ -360,25 +301,37 @@
     if (currentUser.avatar) {
       document.getElementById("myAvatar").innerHTML = '<img src="' + currentUser.avatar + '">';
     }
-    loadFriends();
     loadQuestion();
+    loadFriends();
   }
 
+  // アバター更新
   window.updateAvatar = function(e) {
     var file = e.target.files[0];
     if (!file) return;
     var reader = new FileReader();
     reader.onload = async function(ev) {
-      var avatarData = ev.target.result;
-      currentUser.avatar = avatarData;
-      localStorage.setItem("kimochi_user", JSON.stringify(currentUser));
-      document.getElementById("myAvatar").innerHTML = '<img src="' + avatarData + '">';
-      await set(ref(db, "users/" + currentUser.name + "/avatar"), avatarData);
-      showToast("アイコンを更新しました！");
+      var img = new Image();
+      img.onload = async function() {
+        var canvas = document.createElement("canvas");
+        var size = 200;
+        canvas.width = size; canvas.height = size;
+        var ctx = canvas.getContext("2d");
+        var s = Math.min(img.width, img.height);
+        ctx.drawImage(img, (img.width-s)/2, (img.height-s)/2, s, s, 0, 0, size, size);
+        var data = canvas.toDataURL("image/jpeg", 0.7);
+        currentUser.avatar = data;
+        localStorage.setItem("kimochi_user", JSON.stringify(currentUser));
+        document.getElementById("myAvatar").innerHTML = '<img src="' + data + '">';
+        await set(ref(db, "users/" + currentUser.name + "/avatar"), data);
+        showToast("アイコンを更新しました！");
+      };
+      img.src = ev.target.result;
     };
     reader.readAsDataURL(file);
   };
 
+  // 気分選択
   window.selectMood = function(el, mood, emoji) {
     selectedMood = mood;
     selectedEmoji = emoji;
@@ -395,32 +348,26 @@
     document.getElementById("postBtn").disabled = !ok;
   }
 
-  var postImageData = null;
-
+  // 画像プレビュー
   window.previewPostImage = function(e) {
     var file = e.target.files[0];
     if (!file) return;
-
-    // 1MB以上は圧縮
     var reader = new FileReader();
     reader.onload = function(ev) {
       var img = new Image();
       img.onload = function() {
-        var canvas = document.createElement('canvas');
+        var canvas = document.createElement("canvas");
         var maxW = 800, maxH = 800;
         var w = img.width, h = img.height;
         if (w > maxW || h > maxH) {
-          var ratio = Math.min(maxW/w, maxH/h);
-          w = Math.round(w * ratio);
-          h = Math.round(h * ratio);
+          var r = Math.min(maxW/w, maxH/h);
+          w = Math.round(w*r); h = Math.round(h*r);
         }
-        canvas.width = w;
-        canvas.height = h;
-        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        postImageData = canvas.toDataURL('image/jpeg', 0.7);
-
-        var wrap = document.getElementById('imgPreviewWrap');
-        wrap.innerHTML = '<img class="post-img-preview" src="' + postImageData + '"><button class="img-remove-btn" onclick="removePostImage(event)">✕ 画像を削除</button>';
+        canvas.width = w; canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        postImageData = canvas.toDataURL("image/jpeg", 0.7);
+        document.getElementById("imgPreviewWrap").innerHTML =
+          '<img class="post-img-preview" src="' + postImageData + '"><button class="img-remove-btn" onclick="removePostImage(event)">✕ 削除</button>';
       };
       img.src = ev.target.result;
     };
@@ -430,45 +377,180 @@
   window.removePostImage = function(e) {
     e.stopPropagation();
     postImageData = null;
-    document.getElementById('imgPreviewWrap').innerHTML = '<span>📷 画像を追加（任意）</span>';
-    document.getElementById('postImgInput').value = '';
+    document.getElementById("imgPreviewWrap").innerHTML = '<span>📷 画像を追加（任意）</span>';
+    document.getElementById("postImgInput").value = "";
   };
 
-  // 投稿として永久保存
-  window.createPost = async function() {
+  function resetForm() {
+    document.getElementById("tweetInput").value = "";
+    postImageData = null;
+    document.getElementById("imgPreviewWrap").innerHTML = '<span>📷 画像を追加（任意）</span>';
+    document.getElementById("postImgInput").value = "";
+  }
+
+  // 気分シェア
+  window.shareMood = async function() {
     if (!selectedMood || !currentUser) return;
-    var tweet = document.getElementById("tweetInput").value.trim();
     try {
-      await push(ref(db, "posts/" + currentUser.name), {
-        name: currentUser.name,
-        mood: selectedMood,
-        emoji: selectedEmoji,
-        tweet: tweet,
-        image: postImageData || "",
-        avatar: currentUser.avatar || "",
+      await set(ref(db, "moods/" + currentUser.name), {
+        name: currentUser.name, mood: selectedMood, emoji: selectedEmoji,
+        tweet: document.getElementById("tweetInput").value.trim(),
+        image: postImageData || "", avatar: currentUser.avatar || "",
         timestamp: Date.now()
       });
-      document.getElementById("tweetInput").value = "";
-      postImageData = null;
-      document.getElementById('imgPreviewWrap').innerHTML = '<span>📷 画像を追加（任意）</span>';
-      document.getElementById('postImgInput').value = '';
+      await set(ref(db, "comments/" + currentUser.name), null);
+      resetForm();
+      showToast("シェアしました！");
+    } catch(e) { showToast("エラーが発生しました"); }
+  };
+
+  // 投稿として保存
+  window.createPost = async function() {
+    if (!selectedMood || !currentUser) return;
+    try {
+      await push(ref(db, "posts/" + currentUser.name), {
+        name: currentUser.name, mood: selectedMood, emoji: selectedEmoji,
+        tweet: document.getElementById("tweetInput").value.trim(),
+        image: postImageData || "", avatar: currentUser.avatar || "",
+        timestamp: Date.now()
+      });
+      resetForm();
       showToast("投稿しました！📌");
-    } catch(e) {
-      showToast("エラーが発生しました");
-    }
+    } catch(e) { showToast("エラーが発生しました"); }
+  };
+
+  // みんなの気分
+  function loadFriends() {
+    onValue(ref(db, "moods"), function(snapshot) {
+      var data = snapshot.val();
+      var list = document.getElementById("friendsList");
+      if (!data) { list.innerHTML = '<div class="empty-msg">まだ誰もいません👀</div>'; return; }
+
+      var now = Date.now();
+      var limit = 24 * 60 * 60 * 1000;
+      var isAdmin = currentUser && currentUser.name === "こうすけ";
+
+      var entries = Object.values(data).filter(function(e) {
+        return (now - e.timestamp) < limit;
+      }).sort(function(a,b) { return b.timestamp - a.timestamp; });
+
+      if (entries.length === 0) { list.innerHTML = '<div class="empty-msg">まだ誰もいません👀</div>'; return; }
+
+      Object.keys(commentListeners).forEach(function(name) {
+        if (commentListeners[name]) { commentListeners[name](); delete commentListeners[name]; }
+      });
+
+      list.innerHTML = entries.map(function(entry) {
+        var mins = Math.floor((now - entry.timestamp) / 60000);
+        var timeStr = mins < 1 ? "たった今" : mins < 60 ? mins + "分前" : Math.floor(mins/60) + "時間前";
+        var avHtml = entry.avatar
+          ? '<div class="friend-avatar" onclick="openProfileModal(\'' + entry.name + '\',\'' + entry.avatar + '\')"><img src="' + entry.avatar + '"></div>'
+          : '<div class="friend-avatar" onclick="openProfileModal(\'' + entry.name + '\',\'\')">' + entry.emoji + '</div>';
+        var isMe = currentUser && entry.name === currentUser.name;
+        var crown = isAdmin && !isMe ? "" : (isAdmin ? " 👑" : "");
+        var adminBtn = isAdmin ? '<button class="admin-del-btn" onclick="adminDeleteMood(\'' + entry.name + '\')">🗑 投稿削除</button>' : "";
+        var tweetHtml = entry.tweet ? '<div class="tweet-text">💬 ' + entry.tweet + '</div>' : "";
+        var imgHtml = entry.image ? '<img class="post-image" src="' + entry.image + '" onclick="openImg(this.src)">' : "";
+
+        return '<div class="friend-card">' +
+          '<div class="friend-top">' + avHtml +
+          '<div class="friend-info"><div class="friend-name">' + entry.name + (isMe ? " (自分)" : "") + crown + '</div>' +
+          '<div class="friend-mood">' + entry.emoji + " " + entry.mood + '</div>' +
+          '<div class="friend-time">' + timeStr + '</div></div>' +
+          '<div class="friend-emoji-big">' + entry.emoji + '</div></div>' +
+          tweetHtml + imgHtml + adminBtn +
+          '<div class="comments-section" id="comments-' + entry.name + '"></div>' +
+          '<div class="comment-input-row"><input class="comment-input" id="cinput-' + entry.name + '" placeholder="コメントする...">' +
+          '<button class="comment-send" onclick="sendComment(\'' + entry.name + '\')">送信</button></div>' +
+          '</div>';
+      }).join("");
+
+      entries.forEach(function(entry) { loadComments(entry.name); });
+    });
+  }
+
+  // コメント
+  function loadComments(targetName) {
+    var isAdmin = currentUser && currentUser.name === "こうすけ";
+    var unsub = onValue(ref(db, "comments/" + targetName), function(snap) {
+      var data = snap.val();
+      var el = document.getElementById("comments-" + targetName);
+      if (!el) return;
+      if (!data) { el.innerHTML = ""; return; }
+      var comments = Object.entries(data).sort(function(a,b) { return a[1].timestamp - b[1].timestamp; });
+      el.innerHTML = comments.map(function(entry) {
+        var key = entry[0]; var c = entry[1];
+        var avHtml = c.avatar ? '<div class="comment-avatar"><img src="' + c.avatar + '"></div>' : '<div class="comment-avatar">👤</div>';
+        var adminBtns = isAdmin
+          ? '<div class="comment-admin-btns"><button class="admin-small-btn" onclick="adminEditComment(\'' + targetName + '\',\'' + key + '\',\'' + c.text.replace(/'/g,"\\'") + '\')">✏️</button><button class="admin-small-btn" onclick="adminDeleteComment(\'' + targetName + '\',\'' + key + '\')">🗑</button></div>' : "";
+        return '<div class="comment-item">' + avHtml +
+          '<div class="comment-body"><div class="comment-name" onclick="replyTo(\'' + c.name + '\',\'' + targetName + '\')">@' + c.name + '</div><div class="comment-text">' + c.text + '</div></div>' + adminBtns + '</div>';
+      }).join("");
+    });
+    commentListeners[targetName] = unsub;
+  }
+
+  window.replyTo = function(name, targetName) {
+    var input = document.getElementById("cinput-" + targetName);
+    if (input) { input.value = "@" + name + " "; input.focus(); }
+  };
+
+  window.sendComment = async function(targetName) {
+    if (!currentUser) return;
+    var input = document.getElementById("cinput-" + targetName);
+    var text = input.value.trim();
+    if (!text) return;
+    try {
+      await push(ref(db, "comments/" + targetName), {
+        name: currentUser.name, text: text,
+        avatar: currentUser.avatar || "", timestamp: Date.now()
+      });
+      input.value = "";
+    } catch(e) { showToast("エラーが発生しました"); }
+  };
+
+  // 管理者機能
+  window.adminDeleteMood = async function(name) {
+    if (!confirm(name + "の気分を削除しますか？")) return;
+    try { await set(ref(db, "moods/" + name), null); showToast("削除しました"); } catch(e) { showToast("エラー"); }
+  };
+
+  window.adminEditComment = async function(targetName, key, currentText) {
+    var newText = prompt("コメントを編集:", currentText);
+    if (!newText || newText === currentText) return;
+    try { await set(ref(db, "comments/" + targetName + "/" + key + "/text"), newText); showToast("編集しました"); } catch(e) { showToast("エラー"); }
+  };
+
+  window.adminDeleteComment = async function(targetName, key) {
+    if (!confirm("このコメントを削除しますか？")) return;
+    try { await set(ref(db, "comments/" + targetName + "/" + key), null); showToast("削除しました"); } catch(e) { showToast("エラー"); }
   };
 
   // プロフィールモーダル
-  var currentModalName = null;
-  var postsListener = null;
-
   window.openProfileModal = function(name, avatar) {
-    currentModalName = name;
     document.getElementById("profileModal").classList.add("open");
     document.getElementById("modalName").textContent = name;
-    var av = document.getElementById("modalAvatar");
-    av.innerHTML = avatar ? '<img src="' + avatar + '">' : '👤';
-    loadPosts(name);
+    document.getElementById("modalAvatar").innerHTML = avatar ? '<img src="' + avatar + '">' : "👤";
+    var list = document.getElementById("modalPostsList");
+    list.innerHTML = '<div class="empty-msg">読み込み中...</div>';
+    if (postsListener) { postsListener(); }
+    var isAdmin = currentUser && currentUser.name === "こうすけ";
+    var isOwn = currentUser && currentUser.name === name;
+    postsListener = onValue(ref(db, "posts/" + name), function(snap) {
+      var data = snap.val();
+      if (!data) { list.innerHTML = '<div class="empty-msg">まだ投稿がありません</div>'; return; }
+      var now = Date.now();
+      var posts = Object.entries(data).sort(function(a,b) { return b[1].timestamp - a[1].timestamp; });
+      list.innerHTML = posts.map(function(entry) {
+        var key = entry[0]; var p = entry[1];
+        var mins = Math.floor((now - p.timestamp) / 60000);
+        var timeStr = mins < 60 ? mins + "分前" : mins < 1440 ? Math.floor(mins/60) + "時間前" : Math.floor(mins/1440) + "日前";
+        var imgHtml = p.image ? '<img class="past-post-img" src="' + p.image + '">' : "";
+        var delBtn = (isOwn || isAdmin) ? '<button class="past-post-del" onclick="deletePost(\'' + name + '\',\'' + key + '\')">🗑 削除</button>' : "";
+        return '<div class="past-post-card"><div class="past-post-top"><span class="past-post-mood">' + p.emoji + " " + p.mood + '</span><span class="past-post-time">' + timeStr + '</span></div>' +
+          (p.tweet ? '<div class="past-post-tweet">💬 ' + p.tweet + '</div>' : "") + imgHtml + delBtn + '</div>';
+      }).join("");
+    });
   };
 
   window.closeProfileModal = function() {
@@ -476,234 +558,49 @@
     if (postsListener) { postsListener(); postsListener = null; }
   };
 
-  function loadPosts(name) {
-    var list = document.getElementById("modalPostsList");
-    list.innerHTML = '<div class="empty-msg">読み込み中...</div>';
-    if (postsListener) { postsListener(); }
-
-    var isAdmin = currentUser && currentUser.name === "こうすけ";
-    var isOwn = currentUser && currentUser.name === name;
-
-    postsListener = onValue(ref(db, "posts/" + name), function(snap) {
-      var data = snap.val();
-      if (!data) {
-        list.innerHTML = '<div class="empty-msg">まだ投稿がありません</div>';
-        return;
-      }
-      var posts = Object.entries(data).sort(function(a,b) { return b[1].timestamp - a[1].timestamp; });
-      var now = Date.now();
-      list.innerHTML = posts.map(function(entry) {
-        var key = entry[0];
-        var p = entry[1];
-        var mins = Math.floor((now - p.timestamp) / 60000);
-        var timeStr = mins < 60 ? mins + "分前" : mins < 1440 ? Math.floor(mins/60) + "時間前" : Math.floor(mins/1440) + "日前";
-        var imgHtml = p.image ? '<img class="past-post-img" src="' + p.image + '">' : "";
-        var delBtn = (isOwn || isAdmin)
-          ? '<button class="past-post-del" onclick="deletePost(\'' + name + '\',\'' + key + '\')">🗑 削除</button>'
-          : "";
-        return '<div class="past-post-card">' +
-          '<div class="past-post-top">' +
-          '<span class="past-post-mood">' + p.emoji + ' ' + p.mood + '</span>' +
-          '<span class="past-post-time">' + timeStr + '</span>' +
-          '</div>' +
-          (p.tweet ? '<div class="past-post-tweet">💬 ' + p.tweet + '</div>' : '') +
-          imgHtml +
-          delBtn +
-          '</div>';
-      }).join("");
-    });
-  }
-
   window.deletePost = async function(name, key) {
     if (!confirm("この投稿を削除しますか？")) return;
-    try {
-      await set(ref(db, "posts/" + name + "/" + key), null);
-      showToast("投稿を削除しました");
-    } catch(e) {
-      showToast("エラーが発生しました");
-    }
+    try { await set(ref(db, "posts/" + name + "/" + key), null); showToast("削除しました"); } catch(e) { showToast("エラー"); }
   };
 
-  window.shareMood = async function() {
-    if (!selectedMood || !currentUser) return;
-    var tweet = document.getElementById("tweetInput").value.trim();
-    try {
-      await set(ref(db, "moods/" + currentUser.name), {
-        name: currentUser.name,
-        mood: selectedMood,
-        emoji: selectedEmoji,
-        tweet: tweet,
-        image: postImageData || "",
-        avatar: currentUser.avatar || "",
-        timestamp: Date.now()
-      });
-      await set(ref(db, "comments/" + currentUser.name), null);
-      document.getElementById("tweetInput").value = "";
-      postImageData = null;
-      document.getElementById('imgPreviewWrap').innerHTML = '<span>📷 画像を追加（任意）</span>';
-      document.getElementById('postImgInput').value = '';
-      showToast("シェアしました！");
-    } catch(e) {
-      showToast("エラーが発生しました");
-    }
+  // 画像フルスクリーン
+  window.openImg = function(src) {
+    var overlay = document.createElement("div");
+    overlay.className = "img-fullscreen";
+    overlay.innerHTML = '<img src="' + src + '"><button class="img-fullscreen-close" onclick="this.parentElement.remove()">✕</button>';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+    document.body.appendChild(overlay);
   };
 
-  function loadFriends() {
-    onValue(ref(db, "moods"), function(snapshot) {
-      var data = snapshot.val();
-      var list = document.getElementById("friendsList");
-      if (!data) {
-        list.innerHTML = '<div class="empty-msg">まだ誰もいません👀<br>最初にシェアしよう！</div>';
-        return;
-      }
-
-      var now = Date.now();
-      var limit = 24 * 60 * 60 * 1000; // 24時間
-
-      var entries = Object.values(data).filter(function(e) {
-        return (now - e.timestamp) < limit;
-      }).sort(function(a, b) { return b.timestamp - a.timestamp; });
-
-      if (entries.length === 0) {
-        list.innerHTML = '<div class="empty-msg">まだ誰もいません👀</div>';
-        return;
-      }
-
-      var isAdmin = currentUser && currentUser.name === "こうすけ";
-
-      list.innerHTML = entries.map(function(entry) {
-        var mins = Math.floor((now - entry.timestamp) / 60000);
-        var timeStr = mins < 1 ? "たった今" : mins < 60 ? mins + "分前" : Math.floor(mins/60) + "時間前";
-        var avatarHtml = entry.avatar
-          ? '<div class="friend-avatar"><img src="' + entry.avatar + '"></div>'
-          : '<div class="friend-avatar">' + entry.emoji + '</div>';
-        var tweetHtml = entry.tweet ? '<div class="tweet-text">💬 ' + entry.tweet + '</div>' : "";
-        var imageHtml = entry.image ? '<img class="post-image" src="' + entry.image + '" onclick="openFullscreen(\'' + entry.name + '\')">' : "";
-        if (entry.image) fullscreenImages[entry.name] = entry.image;
-        var isMe = currentUser && entry.name === currentUser.name;
-        var adminBtn = isAdmin
-          ? '<button class="admin-del-btn" onclick="adminDeletePost(\'' + entry.name + '\')">🗑 投稿削除</button>'
-          : "";
-
-        return '<div class="friend-card" id="card-' + entry.name + '">' +
-          '<div class="friend-top">' +
-          avatarHtml +
-          '<div class="friend-info">' +
-          '<div class="friend-name">' + entry.name + (isMe ? " (自分)" : "") + (isAdmin ? ' 👑' : '') + '</div>' +
-          '<div class="friend-mood">' + entry.emoji + " " + entry.mood + '</div>' +
-          '<div class="friend-time">' + timeStr + '</div>' +
-          '</div>' +
-          '<div class="friend-emoji-big">' + entry.emoji + '</div>' +
-          '</div>' +
-          tweetHtml +
-          imageHtml +
-          adminBtn +
-          '<div class="comments-section" id="comments-' + entry.name + '"></div>' +
-          '<div class="reply-tag" id="reply-' + entry.name + '"></div>' +
-          '<div class="comment-input-row">' +
-          '<input class="comment-input" id="cinput-' + entry.name + '" placeholder="コメントする...">' +
-          '<button class="comment-send" onclick="sendComment(\'' + entry.name + '\')">送信</button>' +
-          '</div>' +
-          '</div>';
-      }).join("");
-
-      // コメント読み込み（全リスナーをリセットしてから再登録）
-      Object.keys(commentListeners).forEach(function(name) {
-        if (commentListeners[name]) {
-          commentListeners[name]();
-          delete commentListeners[name];
-        }
-      });
-      entries.forEach(function(entry) {
-        loadComments(entry.name);
-      });
-    });
-  }
-
-  var commentListeners = {};
-
-  function loadComments(targetName) {
-    var unsubscribe = onValue(ref(db, "comments/" + targetName), function(snap) {
-      var data = snap.val();
-      var el = document.getElementById("comments-" + targetName);
-      if (!el) return;
-      if (!data) { el.innerHTML = ""; return; }
-      var isAdmin = currentUser && currentUser.name === "こうすけ";
-      var comments = Object.entries(data).sort(function(a,b) { return a[1].timestamp - b[1].timestamp; });
-      el.innerHTML = comments.map(function(entry) {
-        var key = entry[0];
-        var c = entry[1];
-        var avHtml = c.avatar
-          ? '<div class="comment-avatar"><img src="' + c.avatar + '"></div>'
-          : '<div class="comment-avatar">👤</div>';
-        var adminBtns = isAdmin
-          ? '<div class="comment-admin-btns">' +
-            '<button class="admin-small-btn" onclick="adminEditComment(\'' + targetName + '\',\'' + key + '\',\'' + c.text.replace(/'/g, "\\'") + '\')">✏️</button>' +
-            '<button class="admin-small-btn" onclick="adminDeleteComment(\'' + targetName + '\',\'' + key + '\')">🗑</button>' +
-            '</div>'
-          : "";
-        var replyBtn = '<span class="reply-name" onclick="setReply(\'' + targetName + '\',\'' + c.name + '\')">' + c.name + '</span>';
-        return '<div class="comment-item">' + avHtml +
-          '<div class="comment-body">' +
-          '<div class="comment-name">' + replyBtn + '</div>' +
-          '<div class="comment-text">' + c.text + '</div>' +
-          '</div>' +
-          adminBtns +
-          '</div>';
-      }).join("");
-    });
-    commentListeners[targetName] = unsubscribe;
-  }
-
-  window.setReply = function(targetName, replyToName) {
-    var input = document.getElementById("cinput-" + targetName);
-    var replyTag = document.getElementById("reply-" + targetName);
-    if (!input) return;
-    input.value = "@" + replyToName + " ";
-    input.focus();
-    if (replyTag) {
-      replyTag.innerHTML = '<span class="reply-tag-text">↩️ ' + replyToName + ' への返信 <span style="cursor:pointer;" onclick="clearReply(\'' + targetName + '\')">✕</span></span>';
-    }
-  };
-
-  window.clearReply = function(targetName) {
-    var input = document.getElementById("cinput-" + targetName);
-    var replyTag = document.getElementById("reply-" + targetName);
-    if (input) input.value = "";
-    if (replyTag) replyTag.innerHTML = "";
+  // 通知
+  var notifOn = false;
+  window.toggleNotification = async function() {
+    if (!("Notification" in window)) { showToast("このブラウザは通知非対応です"); return; }
+    var perm = await Notification.requestPermission();
+    notifOn = perm === "granted";
+    var btn = document.getElementById("notifBtn");
+    btn.textContent = notifOn ? "🔔 通知オン" : "🔕 通知オフ";
+    btn.classList.toggle("on", notifOn);
+    showToast(notifOn ? "通知をオンにしました！" : "通知が許可されませんでした");
   };
 
   // 今日の質問
   var questions = [
-    "今日一番笑ったことは？😂",
-    "最近ハマってるものは？🔥",
-    "今食べたいものは何？🍜",
-    "今日の気分を一言で表すと？💭",
-    "最近嬉しかったことは？😊",
-    "今一番行きたい場所は？🗺️",
-    "最近見た動画・映画は？🎬",
-    "今週頑張ったことは？💪",
-    "最近買って良かったものは？🛍️",
-    "今聴いてる曲は？🎵",
-    "今日誰かに言いたいことは？📢",
-    "最近の悩みは？🤔",
-    "今夜何したい？🌙",
-    "最近会いたい人は？👥",
-    "今日のラッキーカラーは？🎨"
+    "今日一番笑ったことは？😂","最近ハマってるものは？🔥","今食べたいものは何？🍜",
+    "今日の気分を一言で表すと？💭","最近嬉しかったことは？😊","今一番行きたい場所は？🗺️",
+    "最近見た動画・映画は？🎬","今週頑張ったことは？💪","最近買って良かったものは？🛍️",
+    "今聴いてる曲は？🎵","今日誰かに言いたいことは？📢","最近の悩みは？🤔",
+    "今夜何したい？🌙","最近会いたい人は？👥","今日のラッキーカラーは？🎨"
   ];
 
-  function getTodayQuestion() {
-    var today = new Date();
-    var dayIndex = today.getFullYear() * 366 + today.getMonth() * 31 + today.getDate();
-    return questions[dayIndex % questions.length];
-  }
-
   function loadQuestion() {
-    var q = getTodayQuestion();
+    var today = new Date();
+    var idx = (today.getFullYear() * 366 + today.getMonth() * 31 + today.getDate()) % questions.length;
+    var q = questions[idx];
     var el = document.getElementById("questionText");
     if (el) el.textContent = q;
 
-    var todayKey = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+    var todayKey = today.toISOString().slice(0,10).replace(/-/g,"");
     onValue(ref(db, "questions/" + todayKey), function(snap) {
       var data = snap.val();
       var answersEl = document.getElementById("questionAnswers");
@@ -711,13 +608,10 @@
       if (!data) { answersEl.innerHTML = ""; return; }
       var answers = Object.values(data).sort(function(a,b) { return a.timestamp - b.timestamp; });
       answersEl.innerHTML = answers.map(function(a) {
-        var avHtml = a.avatar
-          ? '<div class="question-answer-avatar"><img src="' + a.avatar + '"></div>'
-          : '<div class="question-answer-avatar">👤</div>';
+        var avHtml = a.avatar ? '<div class="question-answer-avatar"><img src="' + a.avatar + '"></div>' : '<div class="question-answer-avatar">👤</div>';
         return '<div class="question-answer-item">' + avHtml +
           '<span class="question-answer-name">' + a.name + '</span>' +
-          '<span class="question-answer-text">' + a.text + '</span>' +
-          '</div>';
+          '<span class="question-answer-text">' + a.text + '</span></div>';
       }).join("");
     });
   }
@@ -727,113 +621,15 @@
     var input = document.getElementById("questionInput");
     var text = input.value.trim();
     if (!text) return;
-    var todayKey = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+    var todayKey = new Date().toISOString().slice(0,10).replace(/-/g,"");
     try {
       await push(ref(db, "questions/" + todayKey), {
-        name: currentUser.name,
-        text: text,
-        avatar: currentUser.avatar || "",
-        timestamp: Date.now()
+        name: currentUser.name, text: text,
+        avatar: currentUser.avatar || "", timestamp: Date.now()
       });
       input.value = "";
       showToast("回答しました！💬");
-    } catch(e) {
-      showToast("エラーが発生しました");
-    }
-  };
-
-  // 管理者機能
-  window.adminDeletePost = async function(name) {
-    if (!confirm(name + "の投稿を削除しますか？")) return;
-    try {
-      await set(ref(db, "moods/" + name), null);
-      showToast("投稿を削除しました");
     } catch(e) { showToast("エラーが発生しました"); }
-  };
-
-  window.adminEditComment = async function(targetName, key, currentText) {
-    var newText = prompt("コメントを編集:", currentText);
-    if (!newText || newText === currentText) return;
-    try {
-      await set(ref(db, "comments/" + targetName + "/" + key + "/text"), newText);
-      showToast("コメントを編集しました");
-    } catch(e) { showToast("エラーが発生しました"); }
-  };
-
-  window.adminDeleteComment = async function(targetName, key) {
-    if (!confirm("このコメントを削除しますか？")) return;
-    try {
-      await set(ref(db, "comments/" + targetName + "/" + key), null);
-      showToast("コメントを削除しました");
-    } catch(e) { showToast("エラーが発生しました"); }
-  };
-
-  // 通知機能
-  var notifPermission = false;
-  async function requestNotification() {
-    if (!("Notification" in window)) return;
-    if (Notification.permission === "granted") {
-      notifPermission = true;
-      var btn = document.getElementById("notifBtn");
-      if (btn) { btn.textContent = "🔔 通知オン"; btn.classList.add("on"); }
-      return;
-    }
-    if (Notification.permission !== "denied") {
-      var perm = await Notification.requestPermission();
-      notifPermission = perm === "granted";
-      var btn = document.getElementById("notifBtn");
-      if (btn) {
-        btn.textContent = notifPermission ? "🔔 通知オン" : "🔕 通知オフ";
-        if (notifPermission) btn.classList.add("on");
-      }
-    }
-  }
-
-  window.toggleNotification = async function() {
-    await requestNotification();
-    if (!notifPermission) showToast("通知が許可されませんでした。設定から許可してください");
-    else showToast("通知をオンにしました！");
-  };
-
-  function sendNotif(title, body) {
-    if (!notifPermission) return;
-    try { new Notification(title, { body: body, icon: "https://kou-room.github.io/graffiti-font/kimochi-share.html" }); } catch(e) {}
-  }
-
-  window.sendComment = async function(targetName) {
-    if (!currentUser) return;
-    var input = document.getElementById("cinput-" + targetName);
-    var replyTag = document.getElementById("reply-" + targetName);
-    var text = input.value.trim();
-    if (!text) return;
-    try {
-      await push(ref(db, "comments/" + targetName), {
-        name: currentUser.name,
-        text: text,
-        avatar: currentUser.avatar || "",
-        timestamp: Date.now()
-      });
-      input.value = "";
-      if (replyTag) replyTag.innerHTML = "";
-      // 自分の投稿へのコメントなら通知しない、他人の投稿へは通知
-      if (targetName !== currentUser.name) {
-        sendNotif("気分シェア", currentUser.name + "が" + targetName + "にコメントしました");
-      }
-    } catch(e) {
-      showToast("エラーが発生しました");
-    }
-  };
-
-  // 画像フルスクリーン
-  var fullscreenImages = {};
-  window.openFullscreen = function(name) {
-    var src = fullscreenImages[name];
-    if (!src) return;
-    var overlay = document.createElement('div');
-    overlay.className = 'img-fullscreen';
-    overlay.innerHTML = '<img src="' + src + '"><button class="img-fullscreen-close" onclick="this.parentElement.remove()">✕</button>';
-    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
-    document.body.appendChild(overlay);
   };
 
   function showToast(msg) {
